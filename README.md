@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Scentbook
 
-## Getting Started
+**Letterboxd for fragrance.** Log your collection, keep a wear diary, rank what you've tried, and find what to smell like next.
 
-First, run the development server:
+🚧 In development. See [DECISIONS.md](DECISIONS.md) for the reasoning behind the stack.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Tech stack
+
+- **App:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS
+- **Database:** PostgreSQL + Drizzle ORM (pgvector for similarity search, coming soon)
+- **Cloud (coming soon):** AWS RDS, S3, Lambda, CloudFront, Bedrock, Amplify, defined in AWS CDK
+
+## Data model
+
+```mermaid
+erDiagram
+    brands ||--o{ fragrances : makes
+    fragrances ||--o{ fragrance_notes : has
+    notes ||--o{ fragrance_notes : "appears in"
+    fragrances ||--o{ fragrance_accords : has
+    accords ||--o{ fragrance_accords : "appears in"
+    fragrances ||--o{ fragrance_perfumers : "made by"
+    perfumers ||--o{ fragrance_perfumers : makes
+    users ||--o{ collection_items : owns
+    users ||--o{ rankings : ranks
+    users ||--o{ reviews : writes
+    users ||--o{ wears : logs
+    users ||--o{ follows : follows
+    fragrances ||--o{ collection_items : ""
+    fragrances ||--o{ rankings : ""
+    fragrances ||--o{ reviews : ""
+    fragrances ||--o{ wears : ""
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Running locally
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Install [Postgres.app](https://postgresapp.com), open it, and click **Initialize**.
+2. Create the database: in Postgres.app, double-click any database to open a terminal, then run `CREATE DATABASE scentbook;`
+3. Copy `.env.example` to `.env.local` and set your Mac username.
+4. Then:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+npm run db:migrate
+npm run dev
+```
 
-## Learn More
+Open http://localhost:3000.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Script | What it does |
+|---|---|
+| `npm run db:generate` | Turns changes in `src/db/schema.ts` into a new SQL migration in `drizzle/` |
+| `npm run db:migrate` | Applies pending migrations to the database |
+| `npm run db:studio` | Opens a browser UI for viewing and editing the data |
