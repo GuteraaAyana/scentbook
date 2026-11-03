@@ -4,7 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { ScentCase } from "@/components/scent-case";
+import { RankedList } from "@/components/ranked-list";
 import { listRankings } from "@/db/rankings";
 import { auth } from "@/lib/auth";
 import { pageContainer, primaryButton } from "@/lib/ui";
@@ -62,35 +62,7 @@ async function Rankings() {
             <h2 id={`${bucket.key}-heading`} className="font-display border-b border-line pb-3 text-3xl">
               {bucket.title}
             </h2>
-            {/* A real ranking, so a numbered list; numbers continue across buckets. */}
-            <ol start={items[0].place} className="divide-y divide-line">
-              {items.map((item) => (
-                <li key={item.slug}>
-                  <Link
-                    href={`/fragrances/${item.slug}`}
-                    className="group grid grid-cols-[2rem_4rem_1fr_auto] items-center gap-4 py-4 sm:grid-cols-[3rem_5rem_1fr_auto]"
-                  >
-                    <span className="font-display text-2xl text-muted">{item.place}</span>
-                    <ScentCase
-                      name={item.name}
-                      imageUrl={item.imageUrl}
-                      accords={item.accords}
-                      sizes="5rem"
-                      className="aspect-square"
-                    />
-                    <span className="min-w-0">
-                      <span className="font-display block truncate text-xl group-hover:underline group-hover:underline-offset-4">
-                        {item.name}
-                      </span>
-                      <span className="block truncate text-sm text-muted">{item.brand}</span>
-                    </span>
-                    <span className="font-display text-3xl" aria-label={`Score ${item.score} out of 10`}>
-                      {item.score}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ol>
+            <RankedList items={items} />
           </section>
         );
       })}

@@ -45,7 +45,14 @@ async function Collection() {
   const counts = shelves.map((s) => collection[s.key].length);
   const account = (
     <p className="mt-3 text-sm text-muted">
-      Signed in as {session.user.name}.{" "}
+      Signed in as{" "}
+      <Link
+        href={session.user.username ? `/u/${session.user.username}` : "/settings"}
+        className="text-brass underline underline-offset-4"
+      >
+        {session.user.name}
+      </Link>
+      .{" "}
       <Link href="/rankings" className="text-brass underline underline-offset-4">
         My rankings
       </Link>{" "}

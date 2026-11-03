@@ -89,3 +89,11 @@ This builds on 005 (buckets plus fractional sort keys).
 - **Running out of room:** after enough inserts into one gap, two keys get too close for a number to fit between them. When that happens, the server spaces that bucket out again (n, n−1 … 1, same order), then inserts. It's rare and only rewrites that one user's bucket.
 - **Scores:** each bucket owns a band of the 0–10 scale: loved 6.7–10, fine 3.4–6.6, didn't like 0–3.3. Within a band, the best gets the top and the rest step down evenly by position. So a loved fragrance always outscores a fine one, and adding a new favourite nudges the others' scores down, the way it would in your head.
 - **Tested:** the search, keys and scores are pure functions in `src/lib/ranking.ts` with unit tests (`npm test`): every position is reachable for buckets of 1 to 40, 100 fragrances take at most 7 questions, and the bands never overlap.
+
+## 011. Profiles: public by username, city kept private
+**Date:** 2026-11-03
+
+- **Picked:** public profiles at `/u/[username]` showing name, bio, join date, counts (owned / wanted / ranked), your top 5 ranked fragrances and what's on your shelf. You edit them at `/settings`.
+- **Usernames** are 3–20 letters, numbers or underscores, stored lowercase so `@Santal` and `@santal` can't be two people. The database's unique constraint is the final word: if two people grab the same name at once, the second gets "That username is taken." The rules live in `src/lib/profile.ts` with unit tests.
+- **The city is private.** It's only for the planned weather-based "what to wear today" pick, so it's never sent to a profile page (the query doesn't select it), and the settings form says so.
+- **Considered:** private-by-default profiles. Rejected for now because sharing your rankings is the point of a "Letterboxd for fragrance"; a privacy toggle can come later.

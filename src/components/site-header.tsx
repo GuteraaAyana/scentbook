@@ -63,7 +63,13 @@ async function UserMenu() {
       <Link href="/rankings" className={`${navLink} hidden sm:inline`}>
         My rankings
       </Link>
-      <span className="hidden text-foreground md:inline">{session.user.name}</span>
+      {/* Your profile, or settings until you've picked a username. */}
+      <Link
+        href={session.user.username ? `/u/${session.user.username}` : "/settings"}
+        className="hidden text-foreground transition-colors hover:text-brass md:inline"
+      >
+        {session.user.name}
+      </Link>
       {/* Too narrow for it here below 400px; the collection page has it too. */}
       <SignOutButton className="text-muted transition-colors hover:text-foreground max-[399px]:hidden" />
     </>
