@@ -11,7 +11,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx src/db/seed/index.ts",
-    "fragella": "tsx src/db/import/fragella.ts"
+    "fragella": "tsx src/db/import/fragella.ts",
+    "test": "tsx --test src/**/*.test.ts"
   },
   "dependencies": {
     "better-auth": "^1.7.15",

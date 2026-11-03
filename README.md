@@ -60,6 +60,7 @@ The "Continue with GitHub/Google" buttons appear once their keys are in `.env.lo
 | `npm run db:generate` | Turns changes in `src/db/schema.ts` into a new SQL migration in `drizzle/` |
 | `npm run db:migrate` | Applies pending migrations to the database |
 | `npm run db:studio` | Opens a browser UI for viewing and editing the data |
+| `npm test` | Runs the unit tests (ranking logic) |
 | `npm run db:seed` | Loads the hand-curated catalog in `src/db/seed/data.ts`; safe to re-run |
 | `npm run fragella -- usage` | Shows how many Fragella API requests are left this month (free) |
 | `npm run fragella -- fetch "<Brand>"` | Downloads a brand's 20 most popular fragrances into `.fragella/` (2 requests per brand) |

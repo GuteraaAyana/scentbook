@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CollectionControl, CollectionControlSkeleton } from "@/components/collection-control";
 import { AccordBars, NoteTimeline } from "@/components/fragrance-profile";
+import { RankingControl, RankingControlSkeleton } from "@/components/ranking-control";
 import { ScentCase } from "@/components/scent-case";
 import { getFragranceBySlug, getFragranceSlugs } from "@/db/fragrances";
 import { concentrationLabels, genderLabels } from "@/lib/labels";
@@ -93,6 +94,21 @@ async function FragranceDetails({ params }: Pick<PageProps<"/fragrances/[slug]">
             <CollectionControl fragranceId={fragrance.id} slug={fragrance.slug} />
           </Suspense>
         </div>
+
+        <section className="mt-6 border-t border-line pt-6" aria-label="Your ranking">
+          <Suspense fallback={<RankingControlSkeleton />}>
+            <RankingControl
+              fragrance={{
+                id: fragrance.id,
+                slug: fragrance.slug,
+                name: fragrance.name,
+                brand: fragrance.brand.name,
+                imageUrl: fragrance.imageUrl,
+                accords: fragrance.accords.slice(0, 3),
+              }}
+            />
+          </Suspense>
+        </section>
 
         <section className="mt-14" aria-labelledby="accords-heading">
           <h2 id="accords-heading" className="font-display text-3xl">

@@ -14,12 +14,12 @@ What's done, what's next, and what's planned for later. The reasoning behind eac
 - [x] Login with Better Auth: email + password, GitHub, Google (Day 5, done early)
 - [x] Collections: have / want / had buttons on fragrance pages, and a My collection page (Day 3)
 - [x] UI rework: dark boutique look, lit display cases, bottle photos, notes timeline (DECISIONS 009)
+- [x] Ranking: loved / fine / disliked, "which do you prefer?" comparisons, scores out of 10, My rankings page (Day 4, DECISIONS 010)
 
 ## Now
 - [ ] Add GitHub and Google OAuth keys to `.env.local` (see README)
 
 ## Next (Days 3–4)
-- [ ] Ranking: loved / fine / disliked, then pairwise comparisons to place it (DECISIONS 005)
 - [ ] Profile page: username, bio, city
 
 ## Later

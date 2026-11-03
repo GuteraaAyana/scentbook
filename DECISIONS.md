@@ -78,3 +78,14 @@ A running log of why Scentbook is built the way it is. Each entry covers what we
 - **Considered:** "blotter strips" (each fragrance as a paper testing strip dipped in its accord colors, no photos) and a text-led "perfume label" editorial layout.
 - **Why:** the accord colors give every fragrance a recognisable look even without a photo, and the dark room makes both the colors and the cut-out bottle photos stand out. Colors are tokens in `globals.css`, each checked for contrast (all text is 6:1 or better).
 - **Bottle images:** the transparent `.webp` links from the Fragella import are stored in `fragrances.image_url`. They're linked directly from Fragella's CDN (`unoptimized`), not downloaded, copied or resized by our server, to stay as close as we can to their terms (see 007); the footer credits Fragella. Curated fragrances borrow the image of their imported match. About 2% of the links are dead (403), so a broken image removes itself and the case shows its glow alone.
+
+## 010. How ranking works in practice
+**Date:** 2026-11-03
+
+This builds on 005 (buckets plus fractional sort keys).
+
+- **The comparisons run in the browser.** When you choose loved / fine / disliked, the page loads the other fragrances in that bucket once, then each "Which do you prefer?" answer narrows the search locally, with no server call. Only the final spot is sent, as "just below fragrance A, just above fragrance B". The server looks up A's and B's current keys, so if your list changed in another tab, it notices and asks you to rank again instead of saving a wrong order.
+- **"I can't choose"** puts it right after the fragrance it was compared with.
+- **Running out of room:** after enough inserts into one gap, two keys get too close for a number to fit between them. When that happens, the server spaces that bucket out again (n, n−1 … 1, same order), then inserts. It's rare and only rewrites that one user's bucket.
+- **Scores:** each bucket owns a band of the 0–10 scale: loved 6.7–10, fine 3.4–6.6, didn't like 0–3.3. Within a band, the best gets the top and the rest step down evenly by position. So a loved fragrance always outscores a fine one, and adding a new favourite nudges the others' scores down, the way it would in your head.
+- **Tested:** the search, keys and scores are pure functions in `src/lib/ranking.ts` with unit tests (`npm test`): every position is reachable for buckets of 1 to 40, 100 fragrances take at most 7 questions, and the bands never overlap.
