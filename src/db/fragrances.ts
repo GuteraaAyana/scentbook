@@ -29,8 +29,54 @@ export async function getFragranceSlugs() {
 // Fragrances per browse page (divisible by the 2- and 3-column grids).
 export const PAGE_SIZE = 48;
 
-// One page of fragrance cards for the browse page, by brand then name, each
-// with its three strongest accords for the color strip. `page` starts at 1.
+// The columns a fragrance card shows. Select these and join `brands`.
+export const cardColumns = {
+  id: fragrances.id,
+  name: fragrances.name,
+  slug: fragrances.slug,
+  releaseYear: fragrances.releaseYear,
+  concentration: fragrances.concentration,
+  brand: brands.name,
+};
+
+// Adds each card's three strongest accords (for its color strip), using one
+// query for all the cards instead of one per card.
+export async function withTopAccords<T extends { id: number }>(rows: T[]) {
+  const accordRows = rows.length
+    ? await db
+        .select({
+          fragranceId: fragranceAccords.fragranceId,
+          name: accords.name,
+          color: accords.color,
+          strength: fragranceAccords.strength,
+        })
+        .from(fragranceAccords)
+        .innerJoin(accords, eq(accords.id, fragranceAccords.accordId))
+        .where(inArray(fragranceAccords.fragranceId, rows.map((r) => r.id)))
+        .orderBy(desc(fragranceAccords.strength))
+    : [];
+
+  return rows.map((row) => ({
+    ...row,
+    accords: accordRows
+      .filter((a) => a.fragranceId === row.id)
+      .slice(0, 3)
+      .map(({ name, color, strength }) => ({ name, color, strength })),
+  }));
+}
+
+// What a fragrance card needs (see src/components/fragrance-card.tsx).
+export type FragranceCardData = {
+  name: string;
+  slug: string;
+  releaseYear: number | null;
+  concentration: (typeof fragrances.$inferSelect)["concentration"];
+  brand: string;
+  accords: { name: string; color: string; strength: number }[];
+};
+
+// One page of fragrance cards for the browse page, by brand then name.
+// `page` starts at 1.
 export async function listFragrances(page: number) {
   "use cache";
   cacheLife("days");
@@ -38,14 +84,7 @@ export async function listFragrances(page: number) {
 
   const [rows, [{ total }]] = await Promise.all([
     db
-      .select({
-        id: fragrances.id,
-        name: fragrances.name,
-        slug: fragrances.slug,
-        releaseYear: fragrances.releaseYear,
-        concentration: fragrances.concentration,
-        brand: brands.name,
-      })
+      .select(cardColumns)
       .from(fragrances)
       .innerJoin(brands, eq(brands.id, fragrances.brandId))
       .orderBy(asc(brands.name), asc(fragrances.name), asc(fragrances.id))
@@ -55,32 +94,7 @@ export async function listFragrances(page: number) {
   ]);
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-  if (rows.length === 0) return { fragrances: [], total, pageCount };
-
-  // One query for every card's accords, instead of one query per card.
-  const accordRows = await db
-    .select({
-      fragranceId: fragranceAccords.fragranceId,
-      name: accords.name,
-      color: accords.color,
-      strength: fragranceAccords.strength,
-    })
-    .from(fragranceAccords)
-    .innerJoin(accords, eq(accords.id, fragranceAccords.accordId))
-    .where(inArray(fragranceAccords.fragranceId, rows.map((r) => r.id)))
-    .orderBy(desc(fragranceAccords.strength));
-
-  return {
-    fragrances: rows.map(({ id, ...fragrance }) => ({
-      ...fragrance,
-      accords: accordRows
-        .filter((a) => a.fragranceId === id)
-        .slice(0, 3)
-        .map(({ name, color, strength }) => ({ name, color, strength })),
-    })),
-    total,
-    pageCount,
-  };
+  return { fragrances: await withTopAccords(rows), total, pageCount };
 }
 
 // Everything the detail page shows, or null if no fragrance has this slug.

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { FragranceGrid } from "@/components/fragrance-card";
 import { listFragrances, PAGE_SIZE } from "@/db/fragrances";
-import { concentrationLabels } from "@/lib/labels";
 
 export const metadata: Metadata = {
   title: "All fragrances · Scentbook",
@@ -17,13 +17,13 @@ export default function FragrancesPage(props: PageProps<"/fragrances">) {
     <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 sm:py-16">
       <h1 className="text-4xl font-semibold tracking-tight">All fragrances</h1>
       <Suspense fallback={<GridSkeleton />}>
-        <FragranceGrid searchParams={props.searchParams} />
+        <CatalogPage searchParams={props.searchParams} />
       </Suspense>
     </main>
   );
 }
 
-async function FragranceGrid({ searchParams }: Pick<PageProps<"/fragrances">, "searchParams">) {
+async function CatalogPage({ searchParams }: Pick<PageProps<"/fragrances">, "searchParams">) {
   const raw = (await searchParams).page;
   const page = Number(typeof raw === "string" ? raw : "1");
   if (!Number.isInteger(page) || page < 1) notFound();
@@ -48,43 +48,9 @@ async function FragranceGrid({ searchParams }: Pick<PageProps<"/fragrances">, "s
         {pageCount > 1 ? `${first}–${last} of ${total} fragrances` : `${total} fragrances`}
       </p>
 
-      <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {fragrances.map((fragrance) => (
-          <li key={fragrance.slug}>
-            <Link
-              href={`/fragrances/${fragrance.slug}`}
-              className="group flex h-full flex-col rounded-xl border border-neutral-200 p-5 transition-colors hover:border-neutral-400 dark:border-neutral-800 dark:hover:border-neutral-600"
-            >
-              <span className="text-xs font-medium uppercase tracking-widest text-muted">
-                {fragrance.brand}
-              </span>
-              <span className="mt-1 text-xl font-semibold tracking-tight group-hover:underline group-hover:underline-offset-4">
-                {fragrance.name}
-              </span>
-              <span className="mt-1 text-sm text-muted">
-                {[fragrance.releaseYear, concentrationLabels[fragrance.concentration]]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </span>
-
-              {/* The three strongest accords, sized by strength. */}
-              <span className="mt-auto pt-5">
-                <span className="flex h-2 overflow-hidden rounded-full" aria-hidden="true">
-                  {fragrance.accords.map((accord) => (
-                    <span
-                      key={accord.name}
-                      style={{ flexGrow: accord.strength, backgroundColor: accord.color }}
-                    />
-                  ))}
-                </span>
-                <span className="mt-2 block text-xs text-muted">
-                  {fragrance.accords.map((a) => a.name).join(", ")}
-                </span>
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <div className="mt-10">
+        <FragranceGrid fragrances={fragrances} />
+      </div>
 
       {pageCount > 1 && (
         <nav aria-label="Pages" className="mt-10 flex items-center justify-between text-sm">

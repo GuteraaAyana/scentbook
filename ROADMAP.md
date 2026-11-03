@@ -12,12 +12,12 @@ What's done, what's next, and what's planned for later. The reasoning behind eac
 - [x] Fragella import (`npm run fragella`); see DECISIONS 007. First run: 8 brands, 115 fragrances (126 with curated)
 - [x] Browse page pagination (48 per page)
 - [x] Login with Better Auth: email + password, GitHub, Google (Day 5, done early)
+- [x] Collections: have / want / had buttons on fragrance pages, and a My collection page (Day 3)
 
 ## Now
 - [ ] Add GitHub and Google OAuth keys to `.env.local` (see README)
 
 ## Next (Days 3–4)
-- [ ] Collections: mark a fragrance as have / want / had, and a "My collection" page
 - [ ] Ranking: loved / fine / disliked, then pairwise comparisons to place it (DECISIONS 005)
 - [ ] Profile page: username, bio, city
 

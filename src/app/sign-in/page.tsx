@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { AuthForm } from "@/components/auth-form";
 import { socialProviders } from "@/lib/auth";
 
@@ -8,7 +9,10 @@ export default function SignInPage() {
   return (
     <main className="mx-auto w-full max-w-sm px-4 py-16">
       <h1 className="text-3xl font-semibold tracking-tight">Sign in</h1>
-      <AuthForm mode="sign-in" providers={socialProviders} />
+      {/* AuthForm reads ?next=, so it renders in the browser inside Suspense. */}
+      <Suspense>
+        <AuthForm mode="sign-in" providers={socialProviders} />
+      </Suspense>
     </main>
   );
 }

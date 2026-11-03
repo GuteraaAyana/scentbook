@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { CollectionControl, CollectionControlSkeleton } from "@/components/collection-control";
 import { getFragranceBySlug, getFragranceSlugs } from "@/db/fragrances";
 import { concentrationLabels, genderLabels } from "@/lib/labels";
 
@@ -82,6 +83,11 @@ async function FragranceDetails({
         {fragrance.description && (
           <p className="mt-6 leading-relaxed">{fragrance.description}</p>
         )}
+        <div className="mt-6">
+          <Suspense fallback={<CollectionControlSkeleton />}>
+            <CollectionControl fragranceId={fragrance.id} slug={fragrance.slug} />
+          </Suspense>
+        </div>
       </header>
 
       <section className="mt-12" aria-labelledby="accords-heading">
