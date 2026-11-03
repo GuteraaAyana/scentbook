@@ -16,6 +16,7 @@ What's done, what's next, and what's planned for later. The reasoning behind eac
 - [x] UI rework: dark boutique look, lit display cases, bottle photos, notes timeline (DECISIONS 009)
 - [x] Ranking: loved / fine / disliked, "which do you prefer?" comparisons, scores out of 10, My rankings page (Day 4, DECISIONS 010)
 - [x] Profiles: public /u/[username] with top ranked and shelf; /settings for username, bio, private city (DECISIONS 011)
+- [x] Redesign: diary-app look with accord-coloured posters, community scores and 'How it unfolds' writing (DECISIONS 012)
 
 ## Now
 - [ ] Add GitHub and Google OAuth keys to `.env.local` (see README)

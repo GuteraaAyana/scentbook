@@ -2,7 +2,7 @@
 // are per user and change whenever they click, so they're never cached.
 import { and, desc, eq } from "drizzle-orm";
 import { db } from ".";
-import { cardColumns, withTopAccords } from "./fragrances";
+import { cardColumns, toCards } from "./fragrances";
 import { brands, collectionItems, collectionStatusEnum, fragrances } from "./schema";
 
 export type CollectionStatus = (typeof collectionStatusEnum.enumValues)[number];
@@ -28,7 +28,7 @@ export async function listCollection(userId: string) {
     .where(eq(collectionItems.userId, userId))
     .orderBy(desc(collectionItems.addedAt));
 
-  const cards = await withTopAccords(rows);
+  const cards = await toCards(rows);
   return {
     have: cards.filter((c) => c.status === "have"),
     want: cards.filter((c) => c.status === "want"),

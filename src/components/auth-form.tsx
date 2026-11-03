@@ -120,7 +120,7 @@ export function AuthForm({ mode, providers }: Props) {
         {signUp ? "Already have an account? " : "New to Scentbook? "}
         <Link
           href={`${signUp ? "/sign-in" : "/sign-up"}${nextParam ? `?next=${encodeURIComponent(next)}` : ""}`}
-          className="text-brass underline underline-offset-4">
+          className="text-gold underline underline-offset-4">
           {signUp ? "Sign in" : "Create an account"}
         </Link>
       </p>

@@ -1,39 +1,39 @@
 @import "tailwindcss";
 
-/* Scentbook's look: a dimly lit perfume boutique. Deep plum-black walls,
-   bottles in display cases lit by the colors of their own accords, and brass
-   for the few things you can press. The accord colors are the only bright
-   color on the page; everything else stays quiet. (DECISIONS.md 009) */
+/* Scentbook's look: a dense, social diary app (DECISIONS.md 012). Dark slate
+   so the fragrance "posters", washed in each fragrance's accord colours, carry
+   the colour; gold only for scores and the main action. Every text colour is
+   checked against every surface it sits on. */
 :root {
   color-scheme: dark;
 
-  --background: #191420; /* the room: plum-black, not neutral black */
-  --surface: #221b2a; /* display cases, panels */
-  --raised: #2b2334; /* hover, inputs */
-  --line: #3a3144; /* hairlines between things (decorative) */
-  --line-strong: #7b7084; /* borders of controls: 3:1 against the room */
-  --foreground: #f2edf3; /* 15.6:1 */
-  /* Secondary text. Keep ≥ 4.5:1 against every surface it sits on. */
-  --muted: #ada3b3; /* 7.5:1 on background, 6.2:1 on raised */
-  --brass: #d8b98a; /* primary actions, focus, "selected" */
-  --brass-ink: #241a0e; /* text on brass, 9.1:1 */
+  --background: #12161b; /* the page */
+  --chrome: #0d1014; /* header and footer bars */
+  --surface: #1b2027; /* panels, cards, chips */
+  --raised: #232a33; /* inputs, hover */
+  --line: #2a313b; /* dividers (decorative) */
+  --line-strong: #76818f; /* control borders: 3:1 or better on every surface */
+  --foreground: #e9edf2; /* 15.5:1 on background */
+  --muted: #9aa5b3; /* secondary text: 5.8:1 even on raised */
+  --gold: #f2b33d; /* scores, primary actions, focus: 9.8:1 */
+  --gold-ink: #1a1406; /* text on gold, 9.9:1 */
   --danger: #f2a7a7;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-chrome: var(--chrome);
   --color-surface: var(--surface);
   --color-raised: var(--raised);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
-  --color-brass: var(--brass);
-  --color-brass-ink: var(--brass-ink);
+  --color-gold: var(--gold);
+  --color-gold-ink: var(--gold-ink);
   --color-danger: var(--danger);
 
-  --font-sans: var(--font-instrument-sans);
-  --font-display: var(--font-bodoni-moda);
+  --font-sans: var(--font-manrope);
 }
 
 body {
@@ -42,19 +42,13 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
-/* One visible focus style everywhere, in brass. */
+/* One visible focus style everywhere, in gold. */
 :focus-visible {
-  outline: 2px solid var(--brass);
-  outline-offset: 3px;
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
 }
 
 ::selection {
-  background: var(--brass);
-  color: var(--brass-ink);
-}
-
-/* Fragrance names and headings: Bodoni at display optical size. */
-.font-display {
-  font-optical-sizing: auto;
-  letter-spacing: -0.01em;
+  background: var(--gold);
+  color: var(--gold-ink);
 }

@@ -6,22 +6,22 @@ import { auth } from "@/lib/auth";
 import { pageContainer } from "@/lib/ui";
 import { SignOutButton } from "./sign-out-button";
 
-const navLink = "text-muted transition-colors hover:text-foreground";
+const navLink = "font-bold text-muted transition-colors hover:text-foreground";
 
 // The header itself is static; only the signed-in part reads the request's
 // cookies, so it sits inside <Suspense> and every page keeps a prerendered shell.
 export function SiteHeader() {
   return (
-    <header className="border-b border-line">
-      <nav className={`${pageContainer} flex h-16 items-center gap-4 whitespace-nowrap max-[399px]:gap-3 sm:gap-8`}>
-        <Link href="/" className="font-display text-2xl leading-none max-[399px]:text-xl">
-          Scentbook
+    <header className="bg-chrome">
+      <nav className={`${pageContainer} flex h-14 items-center gap-5 text-sm whitespace-nowrap sm:gap-7`}>
+        <Link href="/" className="text-xl font-extrabold tracking-tight">
+          scentbook
         </Link>
-        <Link href="/fragrances" className={`${navLink} text-sm`}>
+        <Link href="/fragrances" className={navLink}>
           Fragrances
         </Link>
-        <div className="ml-auto flex items-center gap-4 text-sm max-[399px]:gap-3 sm:gap-6">
-          <Suspense fallback={<span className="h-4 w-20" />}>
+        <div className="ml-auto flex items-center gap-4 sm:gap-6">
+          <Suspense fallback={<span className="h-8 w-20" />}>
             <UserMenu />
           </Suspense>
         </div>
@@ -39,39 +39,38 @@ async function UserMenu() {
   if (!session) {
     return (
       <>
-        {/* On the narrowest phones there's only room for Join; its page links to sign-in. */}
+        {/* On the narrowest phones there's only room for one; its page links to the other. */}
         <Link href="/sign-in" className={`${navLink} max-[399px]:hidden`}>
           Sign in
         </Link>
         <Link
           href="/sign-up"
-          className="rounded-full bg-brass px-4 py-2 font-medium text-brass-ink transition-opacity hover:opacity-90"
+          className="inline-flex h-8 items-center rounded-md bg-gold px-3 font-bold text-gold-ink transition-opacity hover:opacity-90"
         >
-          Join
+          Create account
         </Link>
       </>
     );
   }
 
+  const { name, username } = session.user;
   return (
     <>
-      <Link href="/collection" className={navLink}>
-        <span className="sm:hidden">Collection</span>
-        <span className="hidden sm:inline">My collection</span>
+      <Link href="/collection" className={`${navLink} hidden sm:inline`}>
+        Collection
       </Link>
-      {/* No room on phones; the collection page links here too. */}
-      <Link href="/rankings" className={`${navLink} hidden sm:inline`}>
-        My rankings
+      <Link href="/rankings" className={navLink}>
+        Rankings
       </Link>
+      <SignOutButton className={`${navLink} hidden md:inline`} />
       {/* Your profile, or settings until you've picked a username. */}
       <Link
-        href={session.user.username ? `/u/${session.user.username}` : "/settings"}
-        className="hidden text-foreground transition-colors hover:text-brass md:inline"
+        href={username ? `/u/${username}` : "/settings"}
+        aria-label={`${name}: your profile`}
+        className="grid size-8 place-items-center rounded-full bg-gold font-extrabold text-gold-ink"
       >
-        {session.user.name}
+        {name.trim().charAt(0).toUpperCase()}
       </Link>
-      {/* Too narrow for it here below 400px; the collection page has it too. */}
-      <SignOutButton className="text-muted transition-colors hover:text-foreground max-[399px]:hidden" />
     </>
   );
 }

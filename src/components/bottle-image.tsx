@@ -32,7 +32,7 @@ export function BottleImage({ src, name, sizes, priority }: Props) {
       preload={priority}
       loading={priority ? "eager" : "lazy"}
       onError={() => setFailed(true)}
-      className="object-contain p-[12%] drop-shadow-[0_18px_24px_rgba(0,0,0,0.45)] transition-transform duration-300 motion-safe:group-hover:-translate-y-1"
+      className="object-contain px-[12%] py-[18%] drop-shadow-[0_10px_12px_rgba(0,0,0,0.45)] transition-transform duration-200 motion-safe:group-hover:-translate-y-1"
     />
   );
 }

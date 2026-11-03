@@ -12,8 +12,8 @@ export const metadata: Metadata = { title: "Profile settings · Scentbook" };
 
 export default function SettingsPage() {
   return (
-    <main className={`${pageContainer} flex-1 py-12 sm:py-16`}>
-      <h1 className="font-display text-4xl sm:text-5xl">Your profile</h1>
+    <main className={`${pageContainer} flex-1 py-8 sm:py-10`}>
+      <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Your profile</h1>
       <Suspense fallback={<p className="mt-3 text-muted">Loading…</p>}>
         <Settings />
       </Suspense>

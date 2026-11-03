@@ -89,7 +89,7 @@ export function ProfileForm({ initial }: { initial: ProfileFormState["values"] }
           ) : state.saved && !pending ? (
             <>
               <span className="text-muted">Saved. </span>
-              <Link href={`/u/${values.username}`} className="text-brass underline underline-offset-4">
+              <Link href={`/u/${values.username}`} className="text-gold underline underline-offset-4">
                 View your profile
               </Link>
             </>

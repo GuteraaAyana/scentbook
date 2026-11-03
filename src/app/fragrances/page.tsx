@@ -15,8 +15,8 @@ export const metadata: Metadata = {
 // inside <Suspense> and stream in. Each page's data is cached.
 export default function FragrancesPage(props: PageProps<"/fragrances">) {
   return (
-    <main className={`${pageContainer} flex-1 py-12 sm:py-16`}>
-      <h1 className="font-display text-4xl sm:text-5xl">All fragrances</h1>
+    <main className={`${pageContainer} flex-1 py-8 sm:py-10`}>
+      <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">All fragrances</h1>
       <Suspense
         fallback={
           <div className="mt-10">

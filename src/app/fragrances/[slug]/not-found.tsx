@@ -4,7 +4,7 @@ import { pageContainer, secondaryButton } from "@/lib/ui";
 export default function FragranceNotFound() {
   return (
     <main className={`${pageContainer} flex-1 py-20`}>
-      <h1 className="font-display text-4xl sm:text-5xl">
+      <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
         We don&rsquo;t have that fragrance yet
       </h1>
       <p className="mt-4 max-w-md text-muted">

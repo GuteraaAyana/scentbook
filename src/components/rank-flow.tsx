@@ -4,7 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { loadBucket, removeRanking, saveRanking } from "@/lib/actions/ranking";
 import { comparison, placeAfterAnswer, startPlacement, type Placement, type Sentiment } from "@/lib/ranking";
 import { primaryButton, secondaryButton } from "@/lib/ui";
-import { ScentCase } from "./scent-case";
+import { Poster } from "./poster";
 
 type Fragrance = {
   id: number;
@@ -101,14 +101,14 @@ export function RankFlow({ fragrance, current }: { fragrance: Fragrance; current
       <dialog
         ref={dialog}
         aria-labelledby="rank-title"
-        className="m-auto w-[min(40rem,calc(100vw-2rem))] rounded-lg border border-line bg-background p-6 text-foreground backdrop:bg-black/70 sm:p-8"
+        className="m-auto max-h-[calc(100dvh-2rem)] w-[min(34rem,calc(100vw-2rem))] overflow-y-auto rounded-lg bg-surface p-6 text-foreground backdrop:bg-black/75 sm:p-8"
       >
         {step.kind === "feeling" && (
           <>
-            <h2 id="rank-title" className="font-display text-3xl">
+            <h2 id="rank-title" className="text-2xl font-extrabold tracking-tight">
               How did you feel about {fragrance.name}?
             </h2>
-            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
               {feelings.map((f) => (
                 <button
                   key={f.sentiment}
@@ -126,7 +126,7 @@ export function RankFlow({ fragrance, current }: { fragrance: Fragrance; current
 
         {step.kind === "comparing" && pivot && (
           <>
-            <h2 id="rank-title" className="font-display text-3xl">
+            <h2 id="rank-title" className="text-2xl font-extrabold tracking-tight">
               Which do you prefer?
             </h2>
             <p className="mt-1 text-sm text-muted">
@@ -144,14 +144,14 @@ export function RankFlow({ fragrance, current }: { fragrance: Fragrance; current
                   onClick={() => answer(choice)}
                   className="group rounded-md text-left"
                 >
-                  <ScentCase
+                  <Poster
                     name={item.name}
                     imageUrl={item.imageUrl}
                     accords={item.accords}
-                    sizes="(min-width: 640px) 18rem, 45vw"
-                    className="aspect-square transition-shadow group-hover:ring-brass"
+                    sizes="(min-width: 640px) 14rem, 40vw"
+                    className="transition-shadow group-hover:shadow-[inset_0_0_0_2px_var(--gold)]"
                   />
-                  <span className="font-display mt-3 block text-lg leading-snug">{item.name}</span>
+                  <span className="mt-3 block font-bold">{item.name}</span>
                   <span className="block text-sm text-muted">{item.brand}</span>
                 </button>
               ))}
@@ -169,11 +169,11 @@ export function RankFlow({ fragrance, current }: { fragrance: Fragrance; current
 
         {step.kind === "done" && (
           <>
-            <h2 id="rank-title" className="font-display text-3xl">
+            <h2 id="rank-title" className="text-2xl font-extrabold tracking-tight">
               Ranked
             </h2>
             <p className="mt-2 text-muted">
-              {fragrance.name} scores <span className="font-display text-2xl text-foreground">{step.score}</span>{" "}
+              {fragrance.name} scores <span className="text-2xl font-extrabold text-gold">{step.score}</span>{" "}
               out of 10 for you.
             </p>
             <button type="button" onClick={() => dialog.current?.close()} className={`${primaryButton} mt-8`}>

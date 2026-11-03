@@ -1,15 +1,15 @@
 import Link from "next/link";
 import type { FragranceCardData } from "@/db/fragrances";
-import { ScentCase } from "./scent-case";
+import { Poster } from "./poster";
 
 export type RankedItem = Pick<FragranceCardData, "slug" | "name" | "brand" | "imageUrl" | "accords"> & {
   place: number;
   score: number;
 };
 
-// Ranked fragrances as numbered rows: place, bottle, name and brand, score.
-// A real ranking, so it's an ordered list; `start` keeps the numbers going
-// when one list is split into several (loved, fine, didn't like).
+// Ranked fragrances as numbered rows: place, small poster, name and brand,
+// score. A real ranking, so it's an ordered list; `start` keeps the numbers
+// going when one list is split into several (loved, fine, didn't like).
 export function RankedList({ items }: { items: RankedItem[] }) {
   if (items.length === 0) return null;
   return (
@@ -18,23 +18,17 @@ export function RankedList({ items }: { items: RankedItem[] }) {
         <li key={item.slug}>
           <Link
             href={`/fragrances/${item.slug}`}
-            className="group grid grid-cols-[2rem_4rem_1fr_auto] items-center gap-4 py-4 sm:grid-cols-[3rem_5rem_1fr_auto]"
+            className="group grid grid-cols-[1.75rem_2.75rem_1fr_auto] items-center gap-3 py-3 sm:grid-cols-[2.5rem_3rem_1fr_auto] sm:gap-4"
           >
-            <span className="font-display text-2xl text-muted">{item.place}</span>
-            <ScentCase
-              name={item.name}
-              imageUrl={item.imageUrl}
-              accords={item.accords}
-              sizes="5rem"
-              className="aspect-square"
-            />
+            <span className="text-lg font-extrabold text-muted">{item.place}</span>
+            <Poster name={item.name} imageUrl={item.imageUrl} accords={item.accords} sizes="3rem" />
             <span className="min-w-0">
-              <span className="font-display block truncate text-xl group-hover:underline group-hover:underline-offset-4">
+              <span className="block truncate font-bold group-hover:underline group-hover:underline-offset-4">
                 {item.name}
               </span>
               <span className="block truncate text-sm text-muted">{item.brand}</span>
             </span>
-            <span className="font-display text-3xl" aria-label={`Score ${item.score} out of 10`}>
+            <span className="text-2xl font-extrabold text-gold" aria-label={`Score ${item.score} out of 10`}>
               {item.score}
             </span>
           </Link>

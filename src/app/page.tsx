@@ -1,55 +1,61 @@
 import Link from "next/link";
-import { FragranceCard } from "@/components/fragrance-card";
-import { listFeaturedFragrances, listFragrances } from "@/db/fragrances";
-import { pageContainer, primaryButton, secondaryButton } from "@/lib/ui";
+import { FragranceRow } from "@/components/fragrance-card";
+import type { FragranceCardData } from "@/db/fragrances";
+import { listCommunityHighlights, listFeaturedFragrances, listFragrances } from "@/db/fragrances";
+import { pageContainer, primaryButton, rowHeading, secondaryButton } from "@/lib/ui";
 
-// Fully prerendered: the catalog data is cached, and nothing here depends on
-// who's visiting.
+const MIN_ROW = 4;
+
+// Prerendered from cached data; refreshed when the catalog or rankings change.
 export default async function Home() {
-  const [featured, { total }] = await Promise.all([listFeaturedFragrances(5), listFragrances(1)]);
+  const [featured, { topRated, mostRanked }, { total }] = await Promise.all([
+    listFeaturedFragrances(8),
+    listCommunityHighlights(8),
+    listFragrances(1),
+  ]);
 
   return (
-    <main className="flex-1">
-      <section className={`${pageContainer} pt-16 pb-12 sm:pt-24`}>
-        <h1 className="font-display max-w-3xl text-5xl leading-[1.05] sm:text-7xl">
-          Every scent you&rsquo;ve worn, in one place.
-        </h1>
-        <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
-          Browse {total} fragrances by their notes and accords, keep track of what you own and what
-          you want, and rank what you&rsquo;ve tried.
+    <main className={`${pageContainer} flex-1 py-8 sm:py-10`}>
+      <section className="rounded-lg bg-surface p-5 sm:p-6">
+        <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Track every scent you&rsquo;ve worn.</h1>
+        <p className="mt-2 max-w-2xl text-muted">
+          Browse {total} fragrances by their notes and accords, keep a collection, and rank what you&rsquo;ve tried to
+          get your own score out of 10 for each.
         </p>
-        <div className="mt-10 flex flex-wrap gap-3">
+        <div className="mt-5 flex flex-wrap gap-2">
           <Link href="/fragrances" className={primaryButton}>
             Browse fragrances
           </Link>
-          <Link href="/collection" className={secondaryButton}>
-            Start your collection
+          <Link href="/rankings" className={secondaryButton}>
+            Start ranking
           </Link>
         </div>
       </section>
 
-      {/* The shelf: a row of lit display cases. Scrolls sideways on phones. */}
-      {featured.length > 0 && (
-        <section aria-labelledby="shelf-heading" className="pb-20">
-          <div className={pageContainer}>
-            <h2 id="shelf-heading" className="sr-only">
-              Featured fragrances
-            </h2>
-          </div>
-          <ul
-            className={`${pageContainer} flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 sm:grid sm:grid-cols-5 sm:gap-6 sm:overflow-visible`}
-          >
-            {featured.map((fragrance) => (
-              <li key={fragrance.slug} className="w-[42vw] shrink-0 snap-start sm:w-auto">
-                <FragranceCard fragrance={fragrance} />
-              </li>
-            ))}
-          </ul>
-          <div className={pageContainer}>
-            <div className="h-px bg-gradient-to-r from-transparent via-line-strong to-transparent" aria-hidden="true" />
-          </div>
-        </section>
-      )}
+      {/* Community rows wait until enough has been ranked to fill a row. */}
+      {topRated.length >= MIN_ROW && <Row title="Highest rated" fragrances={topRated} />}
+      <Row title="Featured" fragrances={featured} />
+      {mostRanked.length >= MIN_ROW && <Row title="Most ranked" fragrances={mostRanked} />}
     </main>
+  );
+}
+
+function Row({ title, fragrances }: { title: string; fragrances: FragranceCardData[] }) {
+  if (fragrances.length === 0) return null;
+  const id = title.toLowerCase().replace(/\s+/g, "-");
+  return (
+    <section className="mt-10" aria-labelledby={id}>
+      <div className={rowHeading}>
+        <h2 id={id} className="text-base text-foreground">
+          {title}
+        </h2>
+        <Link href="/fragrances" className="hover:text-foreground">
+          All fragrances
+        </Link>
+      </div>
+      <div className="mt-4">
+        <FragranceRow fragrances={fragrances} />
+      </div>
+    </section>
   );
 }

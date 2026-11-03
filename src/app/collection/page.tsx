@@ -21,8 +21,8 @@ const shelves = [
 
 export default function CollectionPage() {
   return (
-    <main className={`${pageContainer} flex-1 py-12 sm:py-16`}>
-      <h1 className="font-display text-4xl sm:text-5xl">My collection</h1>
+    <main className={`${pageContainer} flex-1 py-8 sm:py-10`}>
+      <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">My collection</h1>
       <Suspense
         fallback={
           <div className="mt-10">
@@ -48,15 +48,15 @@ async function Collection() {
       Signed in as{" "}
       <Link
         href={session.user.username ? `/u/${session.user.username}` : "/settings"}
-        className="text-brass underline underline-offset-4"
+        className="text-gold underline underline-offset-4"
       >
         {session.user.name}
       </Link>
       .{" "}
-      <Link href="/rankings" className="text-brass underline underline-offset-4">
+      <Link href="/rankings" className="text-gold underline underline-offset-4">
         My rankings
       </Link>{" "}
-      <SignOutButton className="ml-2 text-brass underline underline-offset-4" />
+      <SignOutButton className="ml-2 text-gold underline underline-offset-4" />
     </p>
   );
 
@@ -82,7 +82,7 @@ async function Collection() {
       {account}
       {shelves.map((shelf) => (
         <section key={shelf.key} className="mt-14" aria-labelledby={`${shelf.key}-heading`}>
-          <h2 id={`${shelf.key}-heading`} className="font-display mb-6 border-b border-line pb-3 text-3xl">
+          <h2 id={`${shelf.key}-heading`} className="mb-4 border-b border-line pb-2 text-base font-bold">
             {shelf.title}
           </h2>
           {collection[shelf.key].length > 0 ? (

@@ -20,6 +20,8 @@ export type SeedFragrance = {
   concentration: Concentration;
   gender: Gender;
   perfumers: string[];
+  // One or two sentences shown under the name on its page; our own words.
+  description?: string;
   notes: { top: string[]; heart: string[]; base: string[] }; // names from `notes`
   accords: Record<string, number>; // accord name → strength 1–100
 };
@@ -140,6 +142,7 @@ export const fragrances: SeedFragrance[] = [
   {
     brand: "Dior",
     name: "Sauvage",
+    description: "Peppery bergamot over a big ambroxan base: bright, loud and built to be noticed.",
     releaseYear: 2015,
     concentration: "edt",
     gender: "masculine",
@@ -154,6 +157,7 @@ export const fragrances: SeedFragrance[] = [
   {
     brand: "Parfums de Marly",
     name: "Althaïr",
+    description: "Cinnamon and orange blossom over a deep, praline-sweet vanilla. Warm without being heavy.",
     releaseYear: 2023,
     concentration: "edp",
     gender: "masculine",
@@ -170,6 +174,7 @@ export const fragrances: SeedFragrance[] = [
   {
     brand: "Chanel",
     name: "Coco Mademoiselle",
+    description: "Sparkling orange and rose over clean patchouli: polished, confident and easy to like.",
     releaseYear: 2001,
     concentration: "edp",
     gender: "feminine",
@@ -184,6 +189,7 @@ export const fragrances: SeedFragrance[] = [
   {
     brand: "Yves Saint Laurent",
     name: "Black Opium",
+    description: "Coffee and white flowers over sweet vanilla. A dark, glossy gourmand for evenings.",
     releaseYear: 2014,
     concentration: "edp",
     gender: "feminine",
@@ -198,6 +204,7 @@ export const fragrances: SeedFragrance[] = [
   {
     brand: "Maison Francis Kurkdjian",
     name: "Baccarat Rouge 540",
+    description: "Saffron and jasmine over airy amberwood. Famous for its glassy, almost sugary glow.",
     releaseYear: 2015,
     concentration: "edp",
     gender: "unisex",
@@ -212,6 +219,7 @@ export const fragrances: SeedFragrance[] = [
   {
     brand: "Le Labo",
     name: "Santal 33",
+    description: "Creamy sandalwood with cardamom, violet and a worn-leather edge. Smoky and dry.",
     releaseYear: 2011,
     concentration: "edp",
     gender: "unisex",
@@ -227,6 +235,7 @@ export const fragrances: SeedFragrance[] = [
   {
     brand: "Creed",
     name: "Aventus",
+    description: "Smoky pineapple and birch over musk and oakmoss: fruity, woody and endlessly imitated.",
     releaseYear: 2010,
     concentration: "edp",
     gender: "masculine",
@@ -242,6 +251,7 @@ export const fragrances: SeedFragrance[] = [
   {
     brand: "Giorgio Armani",
     name: "Acqua di Giò",
+    description: "Citrus and sea air over soft musk. The classic clean, fresh fragrance for warm days.",
     releaseYear: 1996,
     concentration: "edt",
     gender: "masculine",
@@ -256,6 +266,7 @@ export const fragrances: SeedFragrance[] = [
   {
     brand: "Tom Ford",
     name: "Tobacco Vanille",
+    description: "Sweet pipe tobacco, vanilla and dried fruit. Rich, boozy and made for cold weather.",
     releaseYear: 2007,
     concentration: "edp",
     gender: "unisex",
@@ -270,6 +281,7 @@ export const fragrances: SeedFragrance[] = [
   {
     brand: "Viktor&Rolf",
     name: "Flowerbomb",
+    description: "A sweet burst of orchid, jasmine and rose over patchouli. Unapologetically sugary.",
     releaseYear: 2005,
     concentration: "edp",
     gender: "feminine",
@@ -284,6 +296,7 @@ export const fragrances: SeedFragrance[] = [
   {
     brand: "Byredo",
     name: "Gypsy Water",
+    description: "Juniper, pine and incense over vanilla and sandalwood, like woods and campfire smoke.",
     releaseYear: 2008,
     concentration: "edp",
     gender: "unisex",

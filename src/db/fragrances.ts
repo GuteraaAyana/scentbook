@@ -1,11 +1,13 @@
 // Catalog reads used by the fragrance pages.
 //
-// The catalog only changes when we re-seed, so results are cached with
-// `"use cache"`: the page is built once and served from the cache, instead of
-// querying Postgres on every visit.
+// Results are cached with `"use cache"`, so pages are served from the cache
+// instead of querying Postgres on every visit. Two tags clear them: "fragrances"
+// when the catalog is re-seeded or imported, and "rankings" whenever anyone
+// ranks something, since cards and pages show community scores.
 import { cacheLife, cacheTag } from "next/cache";
 import { asc, count, desc, eq, inArray, isNotNull } from "drizzle-orm";
 import { db } from ".";
+import { type CommunityScore, getCommunityScores } from "./community";
 import {
   accords,
   brands,
@@ -15,12 +17,13 @@ import {
   fragrances,
   notes,
   perfumers,
+  rankings,
 } from "./schema";
 
 export async function getFragranceSlugs() {
   "use cache";
   cacheLife("days");
-  cacheTag("fragrances");
+  cacheTag("fragrances", "rankings");
 
   const rows = await db.select({ slug: fragrances.slug }).from(fragrances);
   return rows.map((r) => r.slug);
@@ -40,11 +43,14 @@ export const cardColumns = {
   brand: brands.name,
 };
 
-// Adds each card's three strongest accords (for its color strip), using one
-// query for all the cards instead of one per card.
-export async function withTopAccords<T extends { id: number }>(rows: T[]) {
-  const accordRows = rows.length
-    ? await db
+// Adds what each card shows beyond its own row: its three strongest accords
+// (the poster's colours) and its community score. One query each for all the
+// cards, instead of one per card.
+export async function toCards<T extends { id: number }>(rows: T[]) {
+  const ids = rows.map((r) => r.id);
+  const [accordRows, community] = await Promise.all([
+    rows.length
+      ? db
         .select({
           fragranceId: fragranceAccords.fragranceId,
           name: accords.name,
@@ -53,9 +59,11 @@ export async function withTopAccords<T extends { id: number }>(rows: T[]) {
         })
         .from(fragranceAccords)
         .innerJoin(accords, eq(accords.id, fragranceAccords.accordId))
-        .where(inArray(fragranceAccords.fragranceId, rows.map((r) => r.id)))
+        .where(inArray(fragranceAccords.fragranceId, ids))
         .orderBy(desc(fragranceAccords.strength))
-    : [];
+      : Promise.resolve([]),
+    getCommunityScores(ids),
+  ]);
 
   return rows.map((row) => ({
     ...row,
@@ -63,6 +71,7 @@ export async function withTopAccords<T extends { id: number }>(rows: T[]) {
       .filter((a) => a.fragranceId === row.id)
       .slice(0, 3)
       .map(({ name, color, strength }) => ({ name, color, strength })),
+    community: community.get(row.id) ?? null,
   }));
 }
 
@@ -75,6 +84,7 @@ export type FragranceCardData = {
   imageUrl: string | null;
   brand: string;
   accords: { name: string; color: string; strength: number }[];
+  community: CommunityScore | null;
 };
 
 // One page of fragrance cards for the browse page, by brand then name.
@@ -82,7 +92,7 @@ export type FragranceCardData = {
 export async function listFragrances(page: number) {
   "use cache";
   cacheLife("days");
-  cacheTag("fragrances");
+  cacheTag("fragrances", "rankings");
 
   const [rows, [{ total }]] = await Promise.all([
     db
@@ -96,14 +106,14 @@ export async function listFragrances(page: number) {
   ]);
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-  return { fragrances: await withTopAccords(rows), total, pageCount };
+  return { fragrances: await toCards(rows), total, pageCount };
 }
 
 // Everything the detail page shows, or null if no fragrance has this slug.
 export async function getFragranceBySlug(slug: string) {
   "use cache";
   cacheLife("days");
-  cacheTag("fragrances", `fragrance:${slug}`);
+  cacheTag("fragrances", "rankings", `fragrance:${slug}`);
 
   const [fragrance] = await db
     .select({
@@ -124,7 +134,7 @@ export async function getFragranceBySlug(slug: string) {
   if (!fragrance) return null;
 
   // These three don't depend on each other, so run them at the same time.
-  const [noteRows, accordRows, perfumerRows] = await Promise.all([
+  const [noteRows, accordRows, perfumerRows, community] = await Promise.all([
     db
       .select({ name: notes.name, slug: notes.slug, layer: fragranceNotes.layer })
       .from(fragranceNotes)
@@ -147,6 +157,7 @@ export async function getFragranceBySlug(slug: string) {
       .innerJoin(perfumers, eq(perfumers.id, fragrancePerfumers.perfumerId))
       .where(eq(fragrancePerfumers.fragranceId, fragrance.id))
       .orderBy(asc(perfumers.name)),
+    getCommunityScores([fragrance.id]),
   ]);
 
   return {
@@ -158,15 +169,16 @@ export async function getFragranceBySlug(slug: string) {
     },
     accords: accordRows,
     perfumers: perfumerRows,
+    community: community.get(fragrance.id) ?? null,
   };
 }
 
-// A few bottles for the home page's display shelf: hand-curated fragrances
-// that have a bottle image first, then imported ones.
-export async function listFeaturedFragrances(limit = 5) {
+// Bottles for the home page's Featured row: hand-curated fragrances that have
+// a bottle image first, then imported ones.
+export async function listFeaturedFragrances(limit = 8) {
   "use cache";
   cacheLife("days");
-  cacheTag("fragrances");
+  cacheTag("fragrances", "rankings");
 
   const rows = await db
     .select(cardColumns)
@@ -175,5 +187,31 @@ export async function listFeaturedFragrances(limit = 5) {
     .where(isNotNull(fragrances.imageUrl))
     .orderBy(asc(fragrances.source), asc(fragrances.id))
     .limit(limit);
-  return withTopAccords(rows);
+  return toCards(rows);
+}
+
+// The home page's community rows: the highest-scoring and the most-ranked
+// fragrances. Empty until people start ranking.
+export async function listCommunityHighlights(limit = 8) {
+  "use cache";
+  cacheLife("days");
+  cacheTag("fragrances", "rankings");
+
+  const ranked = await db.selectDistinct({ id: rankings.fragranceId }).from(rankings);
+  const scores = await getCommunityScores(ranked.map((r) => r.id));
+  const byScore = [...scores].sort((a, b) => b[1].score - a[1].score || b[1].rankedBy - a[1].rankedBy);
+  const byCount = [...scores].sort((a, b) => b[1].rankedBy - a[1].rankedBy || b[1].score - a[1].score);
+  const pick = async (entries: typeof byScore) => {
+    const ids = entries.slice(0, limit).map(([id]) => id);
+    if (ids.length === 0) return [];
+    const rows = await db
+      .select(cardColumns)
+      .from(fragrances)
+      .innerJoin(brands, eq(brands.id, fragrances.brandId))
+      .where(inArray(fragrances.id, ids));
+    const cards = await toCards(rows);
+    return ids.map((id) => cards.find((c) => c.id === id)!).filter(Boolean);
+  };
+  const [topRated, mostRanked] = await Promise.all([pick(byScore), pick(byCount)]);
+  return { topRated, mostRanked };
 }

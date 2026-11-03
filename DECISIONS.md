@@ -97,3 +97,19 @@ This builds on 005 (buckets plus fractional sort keys).
 - **Usernames** are 3–20 letters, numbers or underscores, stored lowercase so `@Santal` and `@santal` can't be two people. The database's unique constraint is the final word: if two people grab the same name at once, the second gets "That username is taken." The rules live in `src/lib/profile.ts` with unit tests.
 - **The city is private.** It's only for the planned weather-based "what to wear today" pick, so it's never sent to a profile page (the query doesn't select it), and the settings form says so.
 - **Considered:** private-by-default profiles. Rejected for now because sharing your rankings is the point of a "Letterboxd for fragrance"; a privacy toggle can come later.
+
+## 012. Redesign: a dense "diary app" look, with editorial writing
+**Date:** 2026-11-03
+
+This replaces the look in 009 (the dark boutique). The Fragella bottle images and how they're linked are unchanged.
+
+- **Picked:** direction B from four rendered mockups (Gallery, Diary app, Color field, Editorial), plus the Editorial direction's writing.
+  - Dark slate (`#12161b`) with gold (`#f2b33d`) only for scores and the main action, and one typeface, Manrope.
+  - Fragrances appear as tall **posters**, washed top to bottom in their three strongest accord colours (`src/lib/wash.ts`) with the bottle in front and the community score in the corner.
+  - Home is rows of posters (Highest rated, Featured, Most ranked). Fragrance pages have a hero tinted with the fragrance's colours, a community panel (average score, how many ranked it, % who loved it), and below it "How it unfolds" and the accords.
+- **Community scores are real, not decoration:** each person's score for a fragrance (from where it sits in their own ranked list) averaged over everyone who ranked it (`src/db/community.ts`). Cached catalog pages are tagged "rankings", and saving or removing a ranking calls `updateTag("rankings")`, so the new average shows immediately. The Highest rated / Most ranked rows only appear once at least four fragrances have been ranked.
+- **Writing from the Editorial direction:**
+  - The "How it unfolds" paragraph is generated from each fragrance's note pyramid (`src/lib/writing.ts`, with tests); place names in notes stay capitalised ("Turkish rose").
+  - Curated fragrances can have a one-line `description` in `data.ts`; the first 11 were written for this change and are worth a read-through.
+- **Considered:** keeping the boutique look; the Gallery (light, retail), Color field (bold, playful) and Editorial (magazine) directions. The Diary app suits what Scentbook is for: coming back often to log, rank and compare.
+- **Not yet:** the mockup's friends' activity feed waits until following exists; no fake social data was added.

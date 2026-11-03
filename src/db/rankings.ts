@@ -3,7 +3,7 @@
 import { and, asc, count, desc, eq, gt, ne } from "drizzle-orm";
 import { scoreFor, type Sentiment } from "@/lib/ranking";
 import { db } from ".";
-import { cardColumns, withTopAccords } from "./fragrances";
+import { cardColumns, toCards } from "./fragrances";
 import { brands, fragrances, rankings } from "./schema";
 
 // One bucket of this user's rankings, best first, as fragrance cards with
@@ -22,7 +22,7 @@ export async function getBucket(userId: string, sentiment: Sentiment, excluding?
       ),
     )
     .orderBy(desc(rankings.sortKey));
-  return withTopAccords(rows);
+  return toCards(rows);
 }
 
 // Where this user ranked one fragrance, with its score, or null.
@@ -60,7 +60,7 @@ export async function listRankings(userId: string) {
     // enum order is best bucket first.
     .orderBy(asc(rankings.sentiment), desc(rankings.sortKey));
 
-  const cards = await withTopAccords(rows);
+  const cards = await toCards(rows);
   const bucketSizes = { loved: 0, fine: 0, disliked: 0 };
   for (const card of cards) bucketSizes[card.sentiment]++;
 

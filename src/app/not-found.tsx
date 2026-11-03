@@ -5,7 +5,7 @@ import { pageContainer, secondaryButton } from "@/lib/ui";
 export default function NotFound() {
   return (
     <main className={`${pageContainer} flex-1 py-20`}>
-      <h1 className="font-display text-4xl sm:text-5xl">Nothing here</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Nothing here</h1>
       <p className="mt-4 max-w-md text-muted">
         That page doesn&rsquo;t exist. The link may be mistyped, or the profile may have changed its username.
       </p>

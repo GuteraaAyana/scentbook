@@ -33,10 +33,10 @@ export async function RankingControl({ fragrance }: Props) {
   if (!session) {
     return (
       <p className="text-sm text-muted">
-        <Link href={`/sign-in?next=/fragrances/${fragrance.slug}`} className="text-brass underline underline-offset-4">
+        <Link href={`/sign-in?next=/fragrances/${fragrance.slug}`} className="font-bold text-gold underline underline-offset-4">
           Sign in
         </Link>{" "}
-        to rank it against everything else you&rsquo;ve tried.
+        to rank it and add it to your collection.
       </p>
     );
   }
@@ -44,24 +44,25 @@ export async function RankingControl({ fragrance }: Props) {
   const current = await getUserRanking(session.user.id, fragrance.id);
 
   return (
-    <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
-      {current ? (
-        <p className="flex items-baseline gap-3">
-          <span className="font-display text-5xl leading-none">{current.score}</span>
-          <span className="text-sm text-muted">
-            {current.bucketSize === 1
-              ? `Your score. The only one you ${bucketPhrases[current.sentiment]} so far.`
-              : `Your score. ${ordinal(current.position)} of the ${current.bucketSize} you ${bucketPhrases[current.sentiment]}.`}
-          </span>
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+      {current && (
+        <p className="flex items-baseline gap-2" title={positionText(current)}>
+          <span className="text-sm text-muted">Your score</span>
+          <span className="text-2xl font-extrabold text-gold">{current.score}</span>
+          <span className="sr-only">{positionText(current)}</span>
         </p>
-      ) : (
-        <p className="text-sm text-muted">Tried it? Rank it to get your score out of 10.</p>
       )}
       <RankFlow fragrance={fragrance} current={current} />
     </div>
   );
 }
 
+function positionText(current: NonNullable<Awaited<ReturnType<typeof getUserRanking>>>) {
+  return current.bucketSize === 1
+    ? `The only one you ${bucketPhrases[current.sentiment]} so far.`
+    : `${ordinal(current.position)} of the ${current.bucketSize} you ${bucketPhrases[current.sentiment]}.`;
+}
+
 export function RankingControlSkeleton() {
-  return <div className="h-11 w-64 animate-pulse rounded-full bg-surface" />;
+  return <div className="h-10 w-28 animate-pulse rounded-md bg-surface" />;
 }

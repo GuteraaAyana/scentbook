@@ -19,7 +19,7 @@ export async function generateMetadata(props: PageProps<"/u/[username]">): Promi
 // collects something, so it's rendered per request inside <Suspense>.
 export default function ProfilePage(props: PageProps<"/u/[username]">) {
   return (
-    <main className={`${pageContainer} flex-1 py-12 sm:py-16`}>
+    <main className={`${pageContainer} flex-1 py-8 sm:py-10`}>
       <Suspense fallback={<div className="h-24 w-2/3 animate-pulse rounded bg-surface" aria-label="Loading profile" />}>
         <Profile params={props.params} />
       </Suspense>
@@ -46,7 +46,7 @@ async function Profile({ params }: Pick<PageProps<"/u/[username]">, "params">) {
     <>
       <header className="flex flex-wrap items-start justify-between gap-6">
         <div className="max-w-2xl">
-          <h1 className="font-display text-5xl leading-[1.05] sm:text-6xl">{user.name}</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">{user.name}</h1>
           <p className="mt-2 text-muted">
             @{user.username}, joined {joinedFormat.format(user.joined)}
           </p>
@@ -67,13 +67,13 @@ async function Profile({ params }: Pick<PageProps<"/u/[username]">, "params">) {
         ].map((stat) => (
           <div key={stat.label}>
             <dt className="text-sm text-muted">{stat.label}</dt>
-            <dd className="font-display mt-1 text-4xl">{stat.value}</dd>
+            <dd className="mt-1 text-4xl font-extrabold">{stat.value}</dd>
           </div>
         ))}
       </dl>
 
       <section className="mt-14" aria-labelledby="top-heading">
-        <h2 id="top-heading" className="font-display border-b border-line pb-3 text-3xl">
+        <h2 id="top-heading" className="border-b border-line pb-2 text-base font-bold">
           Top ranked
         </h2>
         {topRanked.length > 0 ? (
@@ -86,7 +86,7 @@ async function Profile({ params }: Pick<PageProps<"/u/[username]">, "params">) {
       </section>
 
       <section className="mt-14" aria-labelledby="shelf-heading">
-        <h2 id="shelf-heading" className="font-display mb-6 border-b border-line pb-3 text-3xl">
+        <h2 id="shelf-heading" className="mb-4 border-b border-line pb-2 text-base font-bold">
           On {isOwner ? "your" : "their"} shelf
         </h2>
         {shelf.length > 0 ? (

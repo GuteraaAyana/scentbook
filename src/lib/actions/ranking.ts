@@ -2,7 +2,7 @@
 // Server Actions for ranking. Like every Server Action they're public POST
 // endpoints, so each checks the session and validates its input itself.
 import { and, eq, inArray, TransactionRollbackError } from "drizzle-orm";
-import { refresh } from "next/cache";
+import { refresh, updateTag } from "next/cache";
 import { headers } from "next/headers";
 import { db } from "@/db";
 import { getBucket, getUserRanking } from "@/db/rankings";
@@ -110,6 +110,7 @@ export async function saveRanking(input: {
 
   if (result === "stale") return { error: "Your list changed while you were ranking. Please rank it again." };
 
+  updateTag("rankings"); // community scores on cached pages include this ranking now
   refresh();
   return { error: null, ranking: await getUserRanking(userId, fragranceId) };
 }
@@ -120,6 +121,7 @@ export async function removeRanking(fragranceId: number) {
   if (!Number.isInteger(fragranceId)) return { error: "Unknown fragrance." };
 
   await db.delete(rankings).where(and(eq(rankings.userId, userId), eq(rankings.fragranceId, fragranceId)));
+  updateTag("rankings");
   refresh();
   return { error: null };
 }

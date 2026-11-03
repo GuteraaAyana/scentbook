@@ -19,8 +19,8 @@ const buckets = [
 
 export default function RankingsPage() {
   return (
-    <main className={`${pageContainer} flex-1 py-12 sm:py-16`}>
-      <h1 className="font-display text-4xl sm:text-5xl">My rankings</h1>
+    <main className={`${pageContainer} flex-1 py-8 sm:py-10`}>
+      <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">My rankings</h1>
       <Suspense fallback={<p className="mt-3 text-muted">Loading your rankings…</p>}>
         <Rankings />
       </Suspense>
@@ -59,7 +59,7 @@ async function Rankings() {
         if (items.length === 0) return null;
         return (
           <section key={bucket.key} className="mt-12" aria-labelledby={`${bucket.key}-heading`}>
-            <h2 id={`${bucket.key}-heading`} className="font-display border-b border-line pb-3 text-3xl">
+            <h2 id={`${bucket.key}-heading`} className="border-b border-line pb-2 text-base font-bold">
               {bucket.title}
             </h2>
             <RankedList items={items} />
