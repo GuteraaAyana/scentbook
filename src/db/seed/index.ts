@@ -12,6 +12,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import * as schema from "../schema";
 import { accords, brands, fragrances, notes } from "./data";
+import { refreshRunningServer } from "./refresh";
 import { upsertCatalog } from "./upsert";
 
 config({ path: ".env.local" });
@@ -55,6 +56,7 @@ async function main() {
   );
 
   await pool.end();
+  await refreshRunningServer();
 }
 
 main().catch((error) => {

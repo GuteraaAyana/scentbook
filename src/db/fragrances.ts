@@ -4,7 +4,7 @@
 // `"use cache"`: the page is built once and served from the cache, instead of
 // querying Postgres on every visit.
 import { cacheLife, cacheTag } from "next/cache";
-import { asc, desc, eq, inArray } from "drizzle-orm";
+import { asc, count, desc, eq, inArray } from "drizzle-orm";
 import { db } from ".";
 import {
   accords,
@@ -26,32 +26,36 @@ export async function getFragranceSlugs() {
   return rows.map((r) => r.slug);
 }
 
-// How many fragrances the browse page shows. Pagination comes once the
-// catalog outgrows this.
-export const BROWSE_LIMIT = 60;
+// Fragrances per browse page (divisible by the 2- and 3-column grids).
+export const PAGE_SIZE = 48;
 
-// Fragrance cards for the browse page, by brand then name, each with its
-// three strongest accords for the color strip.
-export async function listFragrances() {
+// One page of fragrance cards for the browse page, by brand then name, each
+// with its three strongest accords for the color strip. `page` starts at 1.
+export async function listFragrances(page: number) {
   "use cache";
   cacheLife("days");
   cacheTag("fragrances");
 
-  const rows = await db
-    .select({
-      id: fragrances.id,
-      name: fragrances.name,
-      slug: fragrances.slug,
-      releaseYear: fragrances.releaseYear,
-      concentration: fragrances.concentration,
-      brand: brands.name,
-    })
-    .from(fragrances)
-    .innerJoin(brands, eq(brands.id, fragrances.brandId))
-    .orderBy(asc(brands.name), asc(fragrances.name))
-    .limit(BROWSE_LIMIT);
+  const [rows, [{ total }]] = await Promise.all([
+    db
+      .select({
+        id: fragrances.id,
+        name: fragrances.name,
+        slug: fragrances.slug,
+        releaseYear: fragrances.releaseYear,
+        concentration: fragrances.concentration,
+        brand: brands.name,
+      })
+      .from(fragrances)
+      .innerJoin(brands, eq(brands.id, fragrances.brandId))
+      .orderBy(asc(brands.name), asc(fragrances.name), asc(fragrances.id))
+      .limit(PAGE_SIZE)
+      .offset((page - 1) * PAGE_SIZE),
+    db.select({ total: count() }).from(fragrances),
+  ]);
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-  if (rows.length === 0) return [];
+  if (rows.length === 0) return { fragrances: [], total, pageCount };
 
   // One query for every card's accords, instead of one query per card.
   const accordRows = await db
@@ -66,13 +70,17 @@ export async function listFragrances() {
     .where(inArray(fragranceAccords.fragranceId, rows.map((r) => r.id)))
     .orderBy(desc(fragranceAccords.strength));
 
-  return rows.map(({ id, ...fragrance }) => ({
-    ...fragrance,
-    accords: accordRows
-      .filter((a) => a.fragranceId === id)
-      .slice(0, 3)
-      .map(({ name, color, strength }) => ({ name, color, strength })),
-  }));
+  return {
+    fragrances: rows.map(({ id, ...fragrance }) => ({
+      ...fragrance,
+      accords: accordRows
+        .filter((a) => a.fragranceId === id)
+        .slice(0, 3)
+        .map(({ name, color, strength }) => ({ name, color, strength })),
+    })),
+    total,
+    pageCount,
+  };
 }
 
 // Everything the detail page shows, or null if no fragrance has this slug.

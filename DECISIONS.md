@@ -51,7 +51,8 @@ A running log of why Scentbook is built the way it is. Each entry covers what we
 
 - **Picked:** import fragrances from the [Fragella API](https://api.fragella.com) with `npm run fragella`, alongside the hand-curated entries in `src/db/seed/data.ts`. This updates 006: curation stays for the fragrances we care most about, and the import fills out the rest of the catalog.
 - **Considered:** curating all ~150 by hand (slow), using Fragella only as a drafting aid that we verify before entering into `data.ts`, and emailing Fragella to ask permission first.
-- **Why:** it's the fastest legitimate way to a full catalog. The free plan gives 20 requests a month, and one brand request returns up to 20 fragrances, so about 8 brands cover 150 fragrances.
+- **Why:** it's the fastest way to a full catalog. The free plan gives 20 requests a month. We fetch each brand's 20 most popular fragrances (2 requests of 10, from the popularity-sorted `/fragrances?brand=` endpoint): the `/brands/:name` endpoint returns 20 in one request, but in no useful order, with hair mists and obscure flankers instead of the brand's best-known fragrances.
+- **Cleaning the data:** Fragella's names include brands, concentrations and genders ("Tom Ford Lost Cherry", "Black Opium Edp", "... for women"), and its brand listings include sizes, testers, body creams and duplicates. The import strips those words, skips non-perfumes and retail listings, merges spellings of the same fragrance, and takes the curated spelling when a name matches a curated fragrance. The first import (8 brands, 16 requests) gave 115 fragrances.
 - **Known risks, accepted:**
   - Fragella's terms (§3.3) forbid caching or storing "large portions of the API data" unless your plan explicitly permits it, and the free plan doesn't say it does. Storing a catalog in our database likely falls under that.
   - Fragella's notes and accords are AI-predicted, which they estimate at about 80% confidence.

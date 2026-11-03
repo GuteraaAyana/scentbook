@@ -62,6 +62,6 @@ The "Continue with GitHub/Google" buttons appear once their keys are in `.env.lo
 | `npm run db:studio` | Opens a browser UI for viewing and editing the data |
 | `npm run db:seed` | Loads the hand-curated catalog in `src/db/seed/data.ts`; safe to re-run |
 | `npm run fragella -- usage` | Shows how many Fragella API requests are left this month (free) |
-| `npm run fragella -- fetch "<Brand>"` | Downloads up to 20 of a brand's fragrances into `.fragella/` (1 request per brand) |
-| `npm run fragella -- load` | Imports everything in `.fragella/` into the database; safe to re-run, costs no requests |
+| `npm run fragella -- fetch "<Brand>"` | Downloads a brand's 20 most popular fragrances into `.fragella/` (2 requests per brand) |
+| `npm run fragella -- load` | Imports everything in `.fragella/` into the database; safe to re-run, costs no requests. Seed and import refresh a running dev server automatically |
 | `npm run fragella -- remove` | Deletes every imported fragrance, leaving curated ones |

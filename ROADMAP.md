@@ -8,15 +8,13 @@ What's done, what's next, and what's planned for later. The reasoning behind eac
 - [x] Fragrance detail page at `/fragrances/[slug]`: brand, notes by layer, accord bars, not-found page for unknown slugs
 - [x] Browse page at `/fragrances`, linked from the home page
 - [x] First Lighthouse baseline and `EXPLAIN ANALYZE` on the page queries ([PERFORMANCE.md](PERFORMANCE.md))
-
 - [x] Fix dark-mode contrast of grey secondary text (found in the Lighthouse baseline)
-
-- [x] Fragella import (`npm run fragella`); see DECISIONS 007
+- [x] Fragella import (`npm run fragella`); see DECISIONS 007. First run: 8 brands, 115 fragrances (126 with curated)
+- [x] Browse page pagination (48 per page)
 - [x] Login with Better Auth: email + password, GitHub, Google (Day 5, done early)
 
 ## Now
 - [ ] Add GitHub and Google OAuth keys to `.env.local` (see README)
-- [ ] Import the catalog from Fragella (~8 brands, one request each)
 
 ## Next (Days 3–4)
 - [ ] Collections: mark a fragrance as have / want / had, and a "My collection" page
