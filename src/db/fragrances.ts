@@ -4,7 +4,7 @@
 // `"use cache"`: the page is built once and served from the cache, instead of
 // querying Postgres on every visit.
 import { cacheLife, cacheTag } from "next/cache";
-import { asc, desc, eq } from "drizzle-orm";
+import { asc, desc, eq, inArray } from "drizzle-orm";
 import { db } from ".";
 import {
   accords,
@@ -24,6 +24,55 @@ export async function getFragranceSlugs() {
 
   const rows = await db.select({ slug: fragrances.slug }).from(fragrances);
   return rows.map((r) => r.slug);
+}
+
+// How many fragrances the browse page shows. Pagination comes once the
+// catalog outgrows this.
+export const BROWSE_LIMIT = 60;
+
+// Fragrance cards for the browse page, by brand then name, each with its
+// three strongest accords for the color strip.
+export async function listFragrances() {
+  "use cache";
+  cacheLife("days");
+  cacheTag("fragrances");
+
+  const rows = await db
+    .select({
+      id: fragrances.id,
+      name: fragrances.name,
+      slug: fragrances.slug,
+      releaseYear: fragrances.releaseYear,
+      concentration: fragrances.concentration,
+      brand: brands.name,
+    })
+    .from(fragrances)
+    .innerJoin(brands, eq(brands.id, fragrances.brandId))
+    .orderBy(asc(brands.name), asc(fragrances.name))
+    .limit(BROWSE_LIMIT);
+
+  if (rows.length === 0) return [];
+
+  // One query for every card's accords, instead of one query per card.
+  const accordRows = await db
+    .select({
+      fragranceId: fragranceAccords.fragranceId,
+      name: accords.name,
+      color: accords.color,
+      strength: fragranceAccords.strength,
+    })
+    .from(fragranceAccords)
+    .innerJoin(accords, eq(accords.id, fragranceAccords.accordId))
+    .where(inArray(fragranceAccords.fragranceId, rows.map((r) => r.id)))
+    .orderBy(desc(fragranceAccords.strength));
+
+  return rows.map(({ id, ...fragrance }) => ({
+    ...fragrance,
+    accords: accordRows
+      .filter((a) => a.fragranceId === id)
+      .slice(0, 3)
+      .map(({ name, color, strength }) => ({ name, color, strength })),
+  }));
 }
 
 // Everything the detail page shows, or null if no fragrance has this slug.

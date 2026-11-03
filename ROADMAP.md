@@ -5,10 +5,10 @@ What's done, what's next, and what's planned for later. The reasoning behind eac
 ## Done
 - [x] Next.js app, PostgreSQL schema, Drizzle migrations (Day 1)
 - [x] Seed script and first 11 fragrances (`npm run db:seed`)
+- [x] Fragrance detail page at `/fragrances/[slug]`: brand, notes by layer, accord bars, not-found page for unknown slugs
+- [x] Browse page at `/fragrances`, linked from the home page
 
 ## Now (Day 2)
-- [ ] Fragrance detail page at `/fragrances/[slug]`: brand, notes by layer, accord bars, 404 for unknown slugs
-- [ ] Browse page at `/fragrances`, linked from the home page
 - [ ] First Lighthouse baseline and `EXPLAIN ANALYZE` on the detail page query
 
 ## Next

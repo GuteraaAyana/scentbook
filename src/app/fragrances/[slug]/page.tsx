@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getFragranceBySlug, getFragranceSlugs } from "@/db/fragrances";
+import { concentrationLabels, genderLabels } from "@/lib/labels";
 
 // Prerender every fragrance in the catalog at build time. Slugs added later
 // are rendered on their first visit and cached from then on.
@@ -22,21 +23,6 @@ export async function generateMetadata(
     description: `Notes, accords and perfumers for ${fragrance.brand.name} ${fragrance.name}.`,
   };
 }
-
-const concentrationLabels = {
-  extrait: "Extrait de Parfum",
-  parfum: "Parfum",
-  edp: "Eau de Parfum",
-  edt: "Eau de Toilette",
-  edc: "Eau de Cologne",
-  other: null,
-} as const;
-
-const genderLabels = {
-  feminine: "Feminine",
-  masculine: "Masculine",
-  unisex: "Unisex",
-} as const;
 
 const layers = [
   { key: "top", label: "Top", hint: "First impression, fades within the hour" },
