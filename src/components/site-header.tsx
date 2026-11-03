@@ -3,22 +3,25 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { auth } from "@/lib/auth";
+import { pageContainer } from "@/lib/ui";
 import { SignOutButton } from "./sign-out-button";
+
+const navLink = "text-muted transition-colors hover:text-foreground";
 
 // The header itself is static; only the signed-in part reads the request's
 // cookies, so it sits inside <Suspense> and every page keeps a prerendered shell.
 export function SiteHeader() {
   return (
-    <header className="border-b border-neutral-200 dark:border-neutral-800">
-      <nav className="mx-auto flex h-14 w-full max-w-5xl items-center gap-4 whitespace-nowrap px-4 sm:gap-6 sm:px-6">
-        <Link href="/" className="font-semibold tracking-tight">
+    <header className="border-b border-line">
+      <nav className={`${pageContainer} flex h-16 items-center gap-4 whitespace-nowrap max-[399px]:gap-3 sm:gap-8`}>
+        <Link href="/" className="font-display text-2xl leading-none max-[399px]:text-xl">
           Scentbook
         </Link>
-        <Link href="/fragrances" className="text-sm text-muted hover:text-foreground">
+        <Link href="/fragrances" className={`${navLink} text-sm`}>
           Fragrances
         </Link>
-        <div className="ml-auto flex items-center gap-3 text-sm sm:gap-4">
-          <Suspense fallback={<span className="h-4 w-16" />}>
+        <div className="ml-auto flex items-center gap-4 text-sm max-[399px]:gap-3 sm:gap-6">
+          <Suspense fallback={<span className="h-4 w-20" />}>
             <UserMenu />
           </Suspense>
         </div>
@@ -36,14 +39,15 @@ async function UserMenu() {
   if (!session) {
     return (
       <>
-        <Link href="/sign-in" className="text-muted hover:text-foreground">
+        {/* On the narrowest phones there's only room for Join; its page links to sign-in. */}
+        <Link href="/sign-in" className={`${navLink} max-[399px]:hidden`}>
           Sign in
         </Link>
         <Link
           href="/sign-up"
-          className="rounded-full bg-foreground px-4 py-1.5 font-medium text-background transition-opacity hover:opacity-85"
+          className="rounded-full bg-brass px-4 py-2 font-medium text-brass-ink transition-opacity hover:opacity-90"
         >
-          Sign up
+          Join
         </Link>
       </>
     );
@@ -51,12 +55,13 @@ async function UserMenu() {
 
   return (
     <>
-      <Link href="/collection" className="text-muted hover:text-foreground">
+      <Link href="/collection" className={navLink}>
         <span className="sm:hidden">Collection</span>
         <span className="hidden sm:inline">My collection</span>
       </Link>
-      <span className="hidden text-muted sm:inline">{session.user.name}</span>
-      <SignOutButton />
+      <span className="hidden text-foreground md:inline">{session.user.name}</span>
+      {/* Too narrow for it here below 400px; the collection page has it too. */}
+      <SignOutButton className="text-muted transition-colors hover:text-foreground max-[399px]:hidden" />
     </>
   );
 }

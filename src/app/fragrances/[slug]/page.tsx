@@ -3,8 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CollectionControl, CollectionControlSkeleton } from "@/components/collection-control";
+import { AccordBars, NoteTimeline } from "@/components/fragrance-profile";
+import { ScentCase } from "@/components/scent-case";
 import { getFragranceBySlug, getFragranceSlugs } from "@/db/fragrances";
 import { concentrationLabels, genderLabels } from "@/lib/labels";
+import { pageContainer } from "@/lib/ui";
 
 // Prerender every fragrance in the catalog at build time. Slugs added later
 // are rendered on their first visit and cached from then on.
@@ -25,23 +28,14 @@ export async function generateMetadata(
   };
 }
 
-const layers = [
-  { key: "top", label: "Top", hint: "First impression, fades within the hour" },
-  { key: "heart", label: "Heart", hint: "The main character, for a few hours" },
-  { key: "base", label: "Base", hint: "What lingers on skin at the end" },
-] as const;
-
 // The page shell renders immediately; the fragrance itself streams in inside
 // <Suspense>, which is where `params` is read (see the ISR with Cache
 // Components guide in the Next.js docs).
 export default function FragrancePage(props: PageProps<"/fragrances/[slug]">) {
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-16">
-      <Link
-        href="/fragrances"
-        className="text-sm text-muted hover:text-foreground"
-      >
-        &larr; All fragrances
+    <main className={`${pageContainer} flex-1 py-8 sm:py-12`}>
+      <Link href="/fragrances" className="text-sm text-muted transition-colors hover:text-foreground">
+        All fragrances
       </Link>
       <Suspense fallback={<FragranceSkeleton />}>
         <FragranceDetails params={props.params} />
@@ -50,130 +44,84 @@ export default function FragrancePage(props: PageProps<"/fragrances/[slug]">) {
   );
 }
 
-async function FragranceDetails({
-  params,
-}: Pick<PageProps<"/fragrances/[slug]">, "params">) {
+async function FragranceDetails({ params }: Pick<PageProps<"/fragrances/[slug]">, "params">) {
   const { slug } = await params;
   const fragrance = await getFragranceBySlug(slug);
   if (!fragrance) notFound();
 
-  const details = [
-    fragrance.releaseYear,
-    concentrationLabels[fragrance.concentration],
-    genderLabels[fragrance.gender],
-  ].filter(Boolean);
+  const facts = [
+    { label: "Released", value: fragrance.releaseYear },
+    { label: "Concentration", value: concentrationLabels[fragrance.concentration] },
+    { label: "Marketed as", value: genderLabels[fragrance.gender] },
+    {
+      label: fragrance.perfumers.length > 1 ? "Perfumers" : "Perfumer",
+      value: fragrance.perfumers.map((p) => p.name).join(", "),
+    },
+  ].filter((fact) => fact.value);
 
   return (
-    <article className="mt-6">
-      <header>
-        <p className="text-sm font-medium uppercase tracking-widest text-muted">
-          {fragrance.brand.name}
-        </p>
-        <h1 className="mt-1 text-4xl font-semibold tracking-tight sm:text-5xl">
-          {fragrance.name}
-        </h1>
-        <p className="mt-3 text-muted">
-          {details.join(" · ")}
-        </p>
-        {fragrance.perfumers.length > 0 && (
-          <p className="mt-1 text-sm text-muted">
-            By {fragrance.perfumers.map((p) => p.name).join(", ")}
-          </p>
+    <article className="mt-6 grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+      <div className="lg:sticky lg:top-8 lg:self-start">
+        <ScentCase
+          name={fragrance.name}
+          imageUrl={fragrance.imageUrl}
+          accords={fragrance.accords}
+          priority
+          sizes="(min-width: 1024px) 40vw, 100vw"
+          className="aspect-square lg:aspect-[4/5]"
+        />
+      </div>
+
+      <div>
+        <p className="text-muted">{fragrance.brand.name}</p>
+        <h1 className="font-display mt-2 text-5xl leading-[1.05] sm:text-6xl">{fragrance.name}</h1>
+        {fragrance.description && <p className="mt-6 max-w-prose leading-relaxed">{fragrance.description}</p>}
+
+        {facts.length > 0 && (
+          <dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-y border-line py-6 sm:grid-cols-4">
+            {facts.map((fact) => (
+              <div key={fact.label} className={fact.label.startsWith("Perfumer") ? "col-span-2 sm:col-span-1" : ""}>
+                <dt className="text-sm text-muted">{fact.label}</dt>
+                <dd className="mt-1">{fact.value}</dd>
+              </div>
+            ))}
+          </dl>
         )}
-        {fragrance.description && (
-          <p className="mt-6 leading-relaxed">{fragrance.description}</p>
-        )}
-        <div className="mt-6">
+
+        <div className="mt-8">
           <Suspense fallback={<CollectionControlSkeleton />}>
             <CollectionControl fragranceId={fragrance.id} slug={fragrance.slug} />
           </Suspense>
         </div>
-      </header>
 
-      <section className="mt-12" aria-labelledby="accords-heading">
-        <h2 id="accords-heading" className="text-lg font-semibold">
-          Main accords
-        </h2>
-        <ul className="mt-4 space-y-2">
-          {fragrance.accords.map((accord) => (
-            <li
-              key={accord.name}
-              className="grid grid-cols-[7.5rem_1fr] items-center gap-3 text-sm sm:grid-cols-[9rem_1fr]"
-            >
-              <span>{accord.name}</span>
-              <span
-                className="h-3 rounded-full bg-neutral-100 dark:bg-neutral-800"
-                role="meter"
-                aria-label={`${accord.name} strength`}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-valuenow={accord.strength}
-              >
-                <span
-                  className="block h-full rounded-full"
-                  style={{
-                    width: `${accord.strength}%`,
-                    backgroundColor: accord.color,
-                  }}
-                />
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
+        <section className="mt-14" aria-labelledby="accords-heading">
+          <h2 id="accords-heading" className="font-display text-3xl">
+            Accords
+          </h2>
+          <p className="mt-1 mb-6 text-sm text-muted">The overall character, strongest first.</p>
+          <AccordBars accords={fragrance.accords} />
+        </section>
 
-      <section className="mt-12" aria-labelledby="notes-heading">
-        <h2 id="notes-heading" className="text-lg font-semibold">
-          Notes
-        </h2>
-        <dl className="mt-4 divide-y divide-neutral-200 border-y border-neutral-200 dark:divide-neutral-800 dark:border-neutral-800">
-          {layers.map((layer) => (
-            <div
-              key={layer.key}
-              className="grid gap-2 py-4 sm:grid-cols-[9rem_1fr] sm:gap-3"
-            >
-              <dt>
-                <span className="font-medium">{layer.label}</span>
-                <span className="block text-xs text-muted">
-                  {layer.hint}
-                </span>
-              </dt>
-              <dd className="flex flex-wrap gap-2">
-                {fragrance.notes[layer.key].length > 0 ? (
-                  fragrance.notes[layer.key].map((note) => (
-                    <span
-                      key={note.slug}
-                      className="rounded-full border border-neutral-300 px-3 py-1 text-sm dark:border-neutral-700"
-                    >
-                      {note.name}
-                    </span>
-                  ))
-                ) : (
-                  <span className="text-sm text-muted">None listed</span>
-                )}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </section>
+        <section className="mt-14" aria-labelledby="notes-heading">
+          <h2 id="notes-heading" className="font-display text-3xl">
+            Notes
+          </h2>
+          <p className="mt-1 mb-8 text-sm text-muted">How it changes on skin, from the first spray to the dry-down.</p>
+          <NoteTimeline notes={fragrance.notes} />
+        </section>
+      </div>
     </article>
   );
 }
 
 function FragranceSkeleton() {
   return (
-    <div className="mt-6 animate-pulse" aria-busy="true" aria-label="Loading fragrance">
-      <div className="h-4 w-32 rounded bg-neutral-200 dark:bg-neutral-800" />
-      <div className="mt-3 h-10 w-2/3 rounded bg-neutral-200 dark:bg-neutral-800" />
-      <div className="mt-4 h-4 w-48 rounded bg-neutral-200 dark:bg-neutral-800" />
-      <div className="mt-12 space-y-3">
-        {[90, 70, 55, 40, 30].map((w) => (
-          <div
-            key={w}
-            className="h-3 rounded-full bg-neutral-200 dark:bg-neutral-800"
-            style={{ width: `${w}%` }}
-          />
-        ))}
+    <div aria-busy="true" aria-label="Loading fragrance" className="mt-6 grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+      <div className="aspect-square animate-pulse rounded-md bg-surface lg:aspect-[4/5]" />
+      <div>
+        <div className="h-5 w-32 animate-pulse rounded bg-surface" />
+        <div className="mt-4 h-14 w-3/4 animate-pulse rounded bg-surface" />
+        <div className="mt-8 h-20 animate-pulse rounded bg-surface" />
       </div>
     </div>
   );

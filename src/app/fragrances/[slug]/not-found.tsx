@@ -1,17 +1,18 @@
 import Link from "next/link";
+import { pageContainer, secondaryButton } from "@/lib/ui";
 
 export default function FragranceNotFound() {
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6">
-      <h1 className="text-3xl font-semibold tracking-tight">
+    <main className={`${pageContainer} flex-1 py-20`}>
+      <h1 className="font-display text-4xl sm:text-5xl">
         We don&rsquo;t have that fragrance yet
       </h1>
-      <p className="mt-3 text-muted">
+      <p className="mt-4 max-w-md text-muted">
         The link may be mistyped, or it isn&rsquo;t in the catalog yet.
       </p>
       <Link
         href="/fragrances"
-        className="mt-6 inline-block underline underline-offset-4"
+        className={`${secondaryButton} mt-8`}
       >
         Browse all fragrances
       </Link>

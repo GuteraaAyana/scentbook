@@ -15,7 +15,7 @@ export async function CollectionControl({ fragranceId, slug }: { fragranceId: nu
   if (!session) {
     return (
       <p className="text-sm text-muted">
-        <Link href={`/sign-in?next=/fragrances/${slug}`} className="text-foreground underline underline-offset-4">
+        <Link href={`/sign-in?next=/fragrances/${slug}`} className="text-brass underline underline-offset-4">
           Sign in
         </Link>{" "}
         to add this to your collection.
@@ -28,5 +28,5 @@ export async function CollectionControl({ fragranceId, slug }: { fragranceId: nu
 }
 
 export function CollectionControlSkeleton() {
-  return <div className="h-10 w-72 animate-pulse rounded-full bg-neutral-100 dark:bg-neutral-900" />;
+  return <div className="h-10 w-72 animate-pulse rounded-full bg-surface" />;
 }

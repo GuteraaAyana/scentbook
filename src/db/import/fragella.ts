@@ -101,6 +101,8 @@ type FragellaFragrance = {
   };
   "Main Accords"?: string[];
   "Main Accords Percentage"?: Record<string, string>;
+  "Image URL"?: string;
+  "Image URL Transparent"?: string; // bottle cut out, .webp
 };
 
 // ---------------------------------------------------------------------------
@@ -318,6 +320,7 @@ function toCatalog(f: FragellaFragrance, requestedBrand: string): CatalogFragran
     },
     accords: Object.fromEntries(accordEntries),
     externalId: f._id,
+    imageUrl: f["Image URL Transparent"] || f["Image URL"] || null,
   };
 }
 

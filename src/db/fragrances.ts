@@ -4,7 +4,7 @@
 // `"use cache"`: the page is built once and served from the cache, instead of
 // querying Postgres on every visit.
 import { cacheLife, cacheTag } from "next/cache";
-import { asc, count, desc, eq, inArray } from "drizzle-orm";
+import { asc, count, desc, eq, inArray, isNotNull } from "drizzle-orm";
 import { db } from ".";
 import {
   accords,
@@ -36,6 +36,7 @@ export const cardColumns = {
   slug: fragrances.slug,
   releaseYear: fragrances.releaseYear,
   concentration: fragrances.concentration,
+  imageUrl: fragrances.imageUrl,
   brand: brands.name,
 };
 
@@ -71,6 +72,7 @@ export type FragranceCardData = {
   slug: string;
   releaseYear: number | null;
   concentration: (typeof fragrances.$inferSelect)["concentration"];
+  imageUrl: string | null;
   brand: string;
   accords: { name: string; color: string; strength: number }[];
 };
@@ -112,6 +114,7 @@ export async function getFragranceBySlug(slug: string) {
       concentration: fragrances.concentration,
       gender: fragrances.gender,
       description: fragrances.description,
+      imageUrl: fragrances.imageUrl,
       brand: { name: brands.name, slug: brands.slug },
     })
     .from(fragrances)
@@ -156,4 +159,21 @@ export async function getFragranceBySlug(slug: string) {
     accords: accordRows,
     perfumers: perfumerRows,
   };
+}
+
+// A few bottles for the home page's display shelf: hand-curated fragrances
+// that have a bottle image first, then imported ones.
+export async function listFeaturedFragrances(limit = 5) {
+  "use cache";
+  cacheLife("days");
+  cacheTag("fragrances");
+
+  const rows = await db
+    .select(cardColumns)
+    .from(fragrances)
+    .innerJoin(brands, eq(brands.id, fragrances.brandId))
+    .where(isNotNull(fragrances.imageUrl))
+    .orderBy(asc(fragrances.source), asc(fragrances.id))
+    .limit(limit);
+  return withTopAccords(rows);
 }

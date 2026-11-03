@@ -70,3 +70,11 @@ A running log of why Scentbook is built the way it is. Each entry covers what we
 - **Why:** since September 2025 Auth.js has been maintained by the Better Auth team, and new projects are pointed to Better Auth. It's actively developed, has a Drizzle adapter, and keeps users in our own database rather than a hosted service. Switching cost one migration, because there were no users yet.
 - **How it fits:** Better Auth owns `users`, `sessions`, `accounts` and `verifications`; Scentbook's own profile fields (`username`, `bio`, `city`) are declared to it as additional fields. One user can have several `accounts` rows, one per sign-in method. Passwords are stored only as hashes.
 - **Not yet:** email verification and password reset need an email service, so they're left for later.
+
+## 009. The look: a dark perfume boutique, with bottle photos from Fragella
+**Date:** 2026-11-03
+
+- **Picked:** a dark-only design, like a dimly lit perfume shop. Each fragrance sits in a "display case" lit from behind by soft pools of its own accord colors (`src/lib/glow.ts`), with its bottle photo in front. Bodoni Moda for names and headings (the high-contrast style of perfume labels), Instrument Sans for everything else, and brass (`#D8B98A`) for primary actions and keyboard focus. Notes are shown as a timeline (top → heart → base) because that's how they actually unfold on skin.
+- **Considered:** "blotter strips" (each fragrance as a paper testing strip dipped in its accord colors, no photos) and a text-led "perfume label" editorial layout.
+- **Why:** the accord colors give every fragrance a recognisable look even without a photo, and the dark room makes both the colors and the cut-out bottle photos stand out. Colors are tokens in `globals.css`, each checked for contrast (all text is 6:1 or better).
+- **Bottle images:** the transparent `.webp` links from the Fragella import are stored in `fragrances.image_url`. They're linked directly from Fragella's CDN (`unoptimized`), not downloaded, copied or resized by our server, to stay as close as we can to their terms (see 007); the footer credits Fragella. Curated fragrances borrow the image of their imported match. About 2% of the links are dead (403), so a broken image removes itself and the case shows its glow alone.

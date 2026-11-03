@@ -1,31 +1,60 @@
 @import "tailwindcss";
 
+/* Scentbook's look: a dimly lit perfume boutique. Deep plum-black walls,
+   bottles in display cases lit by the colors of their own accords, and brass
+   for the few things you can press. The accord colors are the only bright
+   color on the page; everything else stays quiet. (DECISIONS.md 009) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  /* Secondary text (labels, hints). Must keep at least 4.5:1 contrast with
-     --background in both themes for small text to stay readable. */
-  --muted: #525252; /* 7.8:1 on white */
+  color-scheme: dark;
+
+  --background: #191420; /* the room: plum-black, not neutral black */
+  --surface: #221b2a; /* display cases, panels */
+  --raised: #2b2334; /* hover, inputs */
+  --line: #3a3144; /* hairlines between things (decorative) */
+  --line-strong: #7b7084; /* borders of controls: 3:1 against the room */
+  --foreground: #f2edf3; /* 15.6:1 */
+  /* Secondary text. Keep ≥ 4.5:1 against every surface it sits on. */
+  --muted: #ada3b3; /* 7.5:1 on background, 6.2:1 on raised */
+  --brass: #d8b98a; /* primary actions, focus, "selected" */
+  --brass-ink: #241a0e; /* text on brass, 9.1:1 */
+  --danger: #f2a7a7;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-brass: var(--brass);
+  --color-brass-ink: var(--brass-ink);
+  --color-danger: var(--danger);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --muted: #a3a3a3; /* 8.1:1 on #0a0a0a */
-  }
+  --font-sans: var(--font-instrument-sans);
+  --font-display: var(--font-bodoni-moda);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* One visible focus style everywhere, in brass. */
+:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--brass);
+  color: var(--brass-ink);
+}
+
+/* Fragrance names and headings: Bodoni at display optical size. */
+.font-display {
+  font-optical-sizing: auto;
+  letter-spacing: -0.01em;
 }

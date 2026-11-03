@@ -4,23 +4,32 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { FragranceGrid } from "@/components/fragrance-card";
+import { FragranceGrid, FragranceGridSkeleton } from "@/components/fragrance-card";
+import { SignOutButton } from "@/components/sign-out-button";
 import { listCollection } from "@/db/collections";
 import { auth } from "@/lib/auth";
+import { pageContainer, primaryButton } from "@/lib/ui";
 
 export const metadata: Metadata = { title: "My collection · Scentbook" };
 
-const sections = [
-  { key: "have", title: "Have", empty: "Fragrances you own will show up here." },
-  { key: "want", title: "Want", empty: "Your wishlist is empty." },
-  { key: "had", title: "Had", empty: "Fragrances you used to own will show up here." },
+// Each status is a shelf of its own.
+const shelves = [
+  { key: "have", title: "On my shelf", empty: "Fragrances you own will show up here." },
+  { key: "want", title: "Wishlist", empty: "Fragrances you want will show up here." },
+  { key: "had", title: "Used to own", empty: "Fragrances you've finished or given away will show up here." },
 ] as const;
 
 export default function CollectionPage() {
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 sm:py-16">
-      <h1 className="text-4xl font-semibold tracking-tight">My collection</h1>
-      <Suspense fallback={<p className="mt-2 text-muted">Loading…</p>}>
+    <main className={`${pageContainer} flex-1 py-12 sm:py-16`}>
+      <h1 className="font-display text-4xl sm:text-5xl">My collection</h1>
+      <Suspense
+        fallback={
+          <div className="mt-10">
+            <FragranceGridSkeleton count={4} />
+          </div>
+        }
+      >
         <Collection />
       </Suspense>
     </main>
@@ -33,18 +42,21 @@ async function Collection() {
   if (!session) redirect("/sign-in?next=/collection");
 
   const collection = await listCollection(session.user.id);
-  const total = collection.have.length + collection.want.length + collection.had.length;
+  const counts = shelves.map((s) => collection[s.key].length);
+  const account = (
+    <p className="mt-3 text-sm text-muted">
+      Signed in as {session.user.name}. <SignOutButton className="text-brass underline underline-offset-4" />
+    </p>
+  );
 
-  if (total === 0) {
+  if (counts.every((n) => n === 0)) {
     return (
-      <div className="mt-6">
-        <p className="text-muted">
-          Nothing here yet. Open any fragrance and choose Have it, Want it or Had it.
+      <div className="mt-6 max-w-md">
+        {account}
+        <p className="mt-6 text-muted">
+          Nothing here yet. Open any fragrance and choose Have it, Want it or Had it to put it on a shelf.
         </p>
-        <Link
-          href="/fragrances"
-          className="mt-6 inline-flex h-11 items-center rounded-full bg-foreground px-5 font-medium text-background transition-opacity hover:opacity-85"
-        >
+        <Link href="/fragrances" className={`${primaryButton} mt-8`}>
           Browse fragrances
         </Link>
       </div>
@@ -53,18 +65,19 @@ async function Collection() {
 
   return (
     <>
-      <p className="mt-2 text-muted">
-        {collection.have.length} owned · {collection.want.length} wanted · {collection.had.length} used to own
+      <p className="mt-3 text-muted">
+        {counts[0]} owned, {counts[1]} wanted, {counts[2]} used to own
       </p>
-      {sections.map((section) => (
-        <section key={section.key} className="mt-12" aria-labelledby={`${section.key}-heading`}>
-          <h2 id={`${section.key}-heading`} className="mb-4 text-xl font-semibold">
-            {section.title} <span className="font-normal text-muted">({collection[section.key].length})</span>
+      {account}
+      {shelves.map((shelf) => (
+        <section key={shelf.key} className="mt-14" aria-labelledby={`${shelf.key}-heading`}>
+          <h2 id={`${shelf.key}-heading`} className="font-display mb-6 border-b border-line pb-3 text-3xl">
+            {shelf.title}
           </h2>
-          {collection[section.key].length > 0 ? (
-            <FragranceGrid fragrances={collection[section.key]} />
+          {collection[shelf.key].length > 0 ? (
+            <FragranceGrid fragrances={collection[shelf.key]} />
           ) : (
-            <p className="text-sm text-muted">{section.empty}</p>
+            <p className="text-sm text-muted">{shelf.empty}</p>
           )}
         </section>
       ))}

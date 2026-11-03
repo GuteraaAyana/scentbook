@@ -8,7 +8,7 @@
 //   - fragella: never touches anything that already exists from curation, and
 //     only adds lookup rows (notes, accords...) that are missing.
 
-import { and, eq, inArray, sql, type AnyColumn } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql, type AnyColumn } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import * as schema from "../schema";
 import type { SeedFragrance } from "./data";
@@ -19,6 +19,7 @@ type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
 export type CatalogFragrance = Omit<SeedFragrance, "releaseYear"> & {
   releaseYear: number | null; // imports don't always know it
   externalId?: string;
+  imageUrl?: string | null; // only imports have images (DECISIONS 009)
 };
 
 export type CatalogInput = {
@@ -126,6 +127,7 @@ export async function upsertCatalog(db: Db, input: CatalogInput) {
       gender: f.gender,
       source: input.source,
       externalId: f.externalId ?? null,
+      imageUrl: f.imageUrl ?? null,
     }));
     if (fragranceValues.length > 0) {
       await tx
@@ -141,6 +143,9 @@ export async function upsertCatalog(db: Db, input: CatalogInput) {
             gender: excluded(schema.fragrances.gender),
             source: excluded(schema.fragrances.source),
             externalId: excluded(schema.fragrances.externalId),
+            // Curated data has no images, so re-seeding keeps the one an
+            // import filled in (below) instead of clearing it.
+            ...(curated ? {} : { imageUrl: excluded(schema.fragrances.imageUrl) }),
           },
           // An import may refresh its own rows but never overwrite curated ones.
           setWhere: curated ? undefined : eq(schema.fragrances.source, "fragella"),
@@ -161,6 +166,24 @@ export async function upsertCatalog(db: Db, input: CatalogInput) {
       : [];
     const fragranceIds = new Map(owned.map((r) => [r.slug, r.id]));
     const skipped = fragranceValues.length - owned.length;
+
+    // An import never changes curated fragrances, except to give one without
+    // an image the bottle image of its imported match.
+    if (!curated) {
+      for (const f of fragranceValues) {
+        if (!f.imageUrl || fragranceIds.has(f.slug)) continue;
+        await tx
+          .update(schema.fragrances)
+          .set({ imageUrl: f.imageUrl })
+          .where(
+            and(
+              eq(schema.fragrances.slug, f.slug),
+              eq(schema.fragrances.source, "curated"),
+              isNull(schema.fragrances.imageUrl),
+            ),
+          );
+      }
+    }
 
     // 3. Join rows. Simplest way to make them match the input exactly: delete
     // this batch's existing rows and insert them fresh.

@@ -49,8 +49,8 @@ export function CollectionButtons({
               onClick={() => choose(option.status)}
               className={
                 active
-                  ? "h-10 rounded-full bg-foreground px-4 text-sm font-medium text-background"
-                  : "h-10 rounded-full border border-neutral-300 px-4 text-sm font-medium transition-colors hover:border-foreground dark:border-neutral-700"
+                  ? "h-10 rounded-full border border-brass bg-brass px-4 text-sm font-medium text-brass-ink"
+                  : "h-10 rounded-full border border-line-strong px-4 text-sm font-medium transition-colors hover:border-foreground hover:bg-raised"
               }
             >
               {active && <span aria-hidden="true">✓ </span>}
@@ -61,7 +61,7 @@ export function CollectionButtons({
       </div>
       <p role="status" aria-live="polite" className="mt-2 min-h-5 text-sm">
         {error ? (
-          <span className="text-red-700 dark:text-red-400">{error}</span>
+          <span className="text-danger">{error}</span>
         ) : pending ? (
           <span className="text-muted">Saving…</span>
         ) : null}
