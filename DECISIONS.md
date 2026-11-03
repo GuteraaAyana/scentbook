@@ -45,3 +45,18 @@ A running log of why Scentbook is built the way it is. Each entry covers what we
 - **Picked:** about 150 popular fragrances, entered by hand from brands' official note listings.
 - **Considered:** scraping Fragrantica.
 - **Why:** Scraping breaks Fragrantica's terms of service. A clean, legitimate dataset is worth more in a portfolio project than a large one.
+
+## 007. Import most of the catalog from the Fragella API
+**Date:** 2026-11-03
+
+- **Picked:** import fragrances from the [Fragella API](https://api.fragella.com) with `npm run fragella`, alongside the hand-curated entries in `src/db/seed/data.ts`. This updates 006: curation stays for the fragrances we care most about, and the import fills out the rest of the catalog.
+- **Considered:** curating all ~150 by hand (slow), using Fragella only as a drafting aid that we verify before entering into `data.ts`, and emailing Fragella to ask permission first.
+- **Why:** it's the fastest legitimate way to a full catalog. The free plan gives 20 requests a month, and one brand request returns up to 20 fragrances, so about 8 brands cover 150 fragrances.
+- **Known risks, accepted:**
+  - Fragella's terms (§3.3) forbid caching or storing "large portions of the API data" unless your plan explicitly permits it, and the free plan doesn't say it does. Storing a catalog in our database likely falls under that.
+  - Fragella's notes and accords are AI-predicted, which they estimate at about 80% confidence.
+- **How we contain the risks:**
+  - Every imported row has `source = 'fragella'`, and `npm run fragella -- remove` deletes them all in one step if Fragella objects or we replace them.
+  - Fragella's raw responses live in `.fragella/`, which is git-ignored, so their data is never published in our repo.
+  - Curated data always wins: the import never overwrites a fragrance, note, accord or brand that already exists.
+  - Images aren't imported; we'd be hotlinking Fragella's CDN, which the terms don't address.

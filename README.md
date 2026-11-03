@@ -42,6 +42,7 @@ erDiagram
 ```bash
 npm install
 npm run db:migrate
+npm run db:seed
 npm run dev
 ```
 
@@ -52,3 +53,8 @@ Open http://localhost:3000.
 | `npm run db:generate` | Turns changes in `src/db/schema.ts` into a new SQL migration in `drizzle/` |
 | `npm run db:migrate` | Applies pending migrations to the database |
 | `npm run db:studio` | Opens a browser UI for viewing and editing the data |
+| `npm run db:seed` | Loads the hand-curated catalog in `src/db/seed/data.ts`; safe to re-run |
+| `npm run fragella -- usage` | Shows how many Fragella API requests are left this month (free) |
+| `npm run fragella -- fetch "<Brand>"` | Downloads up to 20 of a brand's fragrances into `.fragella/` (1 request per brand) |
+| `npm run fragella -- load` | Imports everything in `.fragella/` into the database; safe to re-run, costs no requests |
+| `npm run fragella -- remove` | Deletes every imported fragrance, leaving curated ones |

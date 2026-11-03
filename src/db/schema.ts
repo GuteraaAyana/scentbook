@@ -53,6 +53,10 @@ export const collectionStatusEnum = pgEnum("collection_status", [
 // Beli-style ranking: you first say how you felt, then compare within that bucket.
 export const sentimentEnum = pgEnum("sentiment", ["loved", "fine", "disliked"]);
 
+// Where a catalog fragrance came from: hand-curated in src/db/seed/data.ts,
+// or imported from the Fragella API (see DECISIONS.md 007).
+export const catalogSourceEnum = pgEnum("catalog_source", ["curated", "fragella"]);
+
 // ---------------------------------------------------------------------------
 // 1. Catalog
 // ---------------------------------------------------------------------------
@@ -85,6 +89,10 @@ export const fragrances = pgTable(
     gender: genderEnum("gender").notNull().default("unisex"),
     description: text("description"),
     imageUrl: text("image_url"),
+    // Curated rows always win over imported ones, and every imported row can
+    // be found (or removed) by filtering on source.
+    source: catalogSourceEnum("source").notNull().default("curated"),
+    externalId: text("external_id"), // Fragella's `_id`, for imported rows
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

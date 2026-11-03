@@ -41,3 +41,6 @@ yarn-error.log*
 next-env.d.ts
 
 !.env.example
+
+# Raw Fragella API responses (their data; keep out of the public repo)
+/.fragella/
