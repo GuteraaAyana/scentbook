@@ -7,9 +7,10 @@ What's done, what's next, and what's planned for later. The reasoning behind eac
 - [x] Seed script and first 11 fragrances (`npm run db:seed`)
 - [x] Fragrance detail page at `/fragrances/[slug]`: brand, notes by layer, accord bars, not-found page for unknown slugs
 - [x] Browse page at `/fragrances`, linked from the home page
+- [x] First Lighthouse baseline and `EXPLAIN ANALYZE` on the page queries ([PERFORMANCE.md](PERFORMANCE.md))
 
-## Now (Day 2)
-- [ ] First Lighthouse baseline and `EXPLAIN ANALYZE` on the detail page query
+## Now
+- [ ] Fix dark-mode contrast of grey secondary text (found in the Lighthouse baseline)
 
 ## Next
 - [ ] Grow the catalog toward ~150 fragrances, verified against official listings
