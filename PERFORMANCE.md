@@ -21,6 +21,7 @@ Targets: LCP ≤ 2.5 s, TBT ≤ 200 ms, CLS ≤ 0.1. All three pages pass.
 - LCP (2.3 s) is the number closest to its limit. It's a simulated slow-4G estimate based on the CSS, font and JavaScript the page loads first, not a measured delay: in the actual load, the largest text rendered 36 ms after the first byte arrived. Watch this number as the pages gain images.
 - Most of the page weight is the Next.js and React runtime. Lighthouse flags about 29 KiB of unused JavaScript and 13 KiB of legacy JavaScript in a framework chunk; these are framework defaults, not our code.
 - **Accessibility issue:** grey secondary text (`text-neutral-500`, #737373) on the dark-mode background has a contrast ratio of 4.17:1, below the 4.5:1 minimum. Light mode passes.
+  - **Fixed the same day:** secondary text now uses a `text-muted` color token (`--muted` in `globals.css`): #525252 in light mode (7.8:1) and #a3a3a3 in dark mode (8.1:1). After the fix, Lighthouse accessibility scores 100 on the home, browse, detail and not-found pages in both themes.
 
 ### Database (`EXPLAIN ANALYZE`)
 

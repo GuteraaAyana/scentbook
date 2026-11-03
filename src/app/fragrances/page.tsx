@@ -15,16 +15,16 @@ export default async function FragrancesPage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 sm:py-16">
-      <Link href="/" className="text-sm text-neutral-500 hover:text-foreground">
+      <Link href="/" className="text-sm text-muted hover:text-foreground">
         &larr; Scentbook
       </Link>
       <h1 className="mt-6 text-4xl font-semibold tracking-tight">All fragrances</h1>
-      <p className="mt-2 text-neutral-600 dark:text-neutral-400">
+      <p className="mt-2 text-muted">
         {fragrances.length} fragrances
       </p>
 
       {fragrances.length === 0 ? (
-        <p className="mt-10 text-neutral-500">
+        <p className="mt-10 text-muted">
           The catalog is empty. Run <code className="font-mono">npm run db:seed</code> to add fragrances.
         </p>
       ) : (
@@ -35,13 +35,13 @@ export default async function FragrancesPage() {
                 href={`/fragrances/${fragrance.slug}`}
                 className="group flex h-full flex-col rounded-xl border border-neutral-200 p-5 transition-colors hover:border-neutral-400 dark:border-neutral-800 dark:hover:border-neutral-600"
               >
-                <span className="text-xs font-medium uppercase tracking-widest text-neutral-500">
+                <span className="text-xs font-medium uppercase tracking-widest text-muted">
                   {fragrance.brand}
                 </span>
                 <span className="mt-1 text-xl font-semibold tracking-tight group-hover:underline group-hover:underline-offset-4">
                   {fragrance.name}
                 </span>
-                <span className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+                <span className="mt-1 text-sm text-muted">
                   {[fragrance.releaseYear, concentrationLabels[fragrance.concentration]]
                     .filter(Boolean)
                     .join(" · ")}
@@ -57,7 +57,7 @@ export default async function FragrancesPage() {
                       />
                     ))}
                   </span>
-                  <span className="mt-2 block text-xs text-neutral-500">
+                  <span className="mt-2 block text-xs text-muted">
                     {fragrance.accords.map((a) => a.name).join(", ")}
                   </span>
                 </span>

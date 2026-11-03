@@ -38,7 +38,7 @@ export default function FragrancePage(props: PageProps<"/fragrances/[slug]">) {
     <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-16">
       <Link
         href="/fragrances"
-        className="text-sm text-neutral-500 hover:text-foreground"
+        className="text-sm text-muted hover:text-foreground"
       >
         &larr; All fragrances
       </Link>
@@ -65,17 +65,17 @@ async function FragranceDetails({
   return (
     <article className="mt-6">
       <header>
-        <p className="text-sm font-medium uppercase tracking-widest text-neutral-500">
+        <p className="text-sm font-medium uppercase tracking-widest text-muted">
           {fragrance.brand.name}
         </p>
         <h1 className="mt-1 text-4xl font-semibold tracking-tight sm:text-5xl">
           {fragrance.name}
         </h1>
-        <p className="mt-3 text-neutral-600 dark:text-neutral-400">
+        <p className="mt-3 text-muted">
           {details.join(" · ")}
         </p>
         {fragrance.perfumers.length > 0 && (
-          <p className="mt-1 text-sm text-neutral-500">
+          <p className="mt-1 text-sm text-muted">
             By {fragrance.perfumers.map((p) => p.name).join(", ")}
           </p>
         )}
@@ -128,7 +128,7 @@ async function FragranceDetails({
             >
               <dt>
                 <span className="font-medium">{layer.label}</span>
-                <span className="block text-xs text-neutral-500">
+                <span className="block text-xs text-muted">
                   {layer.hint}
                 </span>
               </dt>
@@ -143,7 +143,7 @@ async function FragranceDetails({
                     </span>
                   ))
                 ) : (
-                  <span className="text-sm text-neutral-500">None listed</span>
+                  <span className="text-sm text-muted">None listed</span>
                 )}
               </dd>
             </div>

@@ -9,8 +9,9 @@ What's done, what's next, and what's planned for later. The reasoning behind eac
 - [x] Browse page at `/fragrances`, linked from the home page
 - [x] First Lighthouse baseline and `EXPLAIN ANALYZE` on the page queries ([PERFORMANCE.md](PERFORMANCE.md))
 
+- [x] Fix dark-mode contrast of grey secondary text (found in the Lighthouse baseline)
+
 ## Now
-- [ ] Fix dark-mode contrast of grey secondary text (found in the Lighthouse baseline)
 
 ## Next
 - [ ] Grow the catalog toward ~150 fragrances, verified against official listings
