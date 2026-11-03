@@ -11,11 +11,17 @@ What's done, what's next, and what's planned for later. The reasoning behind eac
 
 - [x] Fix dark-mode contrast of grey secondary text (found in the Lighthouse baseline)
 
-## Now
+- [x] Fragella import (`npm run fragella`); see DECISIONS 007
+- [x] Login with Better Auth: email + password, GitHub, Google (Day 5, done early)
 
-## Next
-- [ ] Grow the catalog toward ~150 fragrances, verified against official listings
-- [ ] Login with Auth.js (Day 5)
+## Now
+- [ ] Add GitHub and Google OAuth keys to `.env.local` (see README)
+- [ ] Import the catalog from Fragella (~8 brands, one request each)
+
+## Next (Days 3–4)
+- [ ] Collections: mark a fragrance as have / want / had, and a "My collection" page
+- [ ] Ranking: loved / fine / disliked, then pairwise comparisons to place it (DECISIONS 005)
+- [ ] Profile page: username, bio, city
 
 ## Later
 - [ ] **User fragrance submissions with admin review.** Signed-in users submit a missing fragrance; it waits in a queue until an admin approves it, so nothing unverified reaches the catalog.

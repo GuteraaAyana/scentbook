@@ -60,3 +60,12 @@ A running log of why Scentbook is built the way it is. Each entry covers what we
   - Fragella's raw responses live in `.fragella/`, which is git-ignored, so their data is never published in our repo.
   - Curated data always wins: the import never overwrites a fragrance, note, accord or brand that already exists.
   - Images aren't imported; we'd be hotlinking Fragella's CDN, which the terms don't address.
+
+## 008. Better Auth for login
+**Date:** 2026-11-03
+
+- **Picked:** [Better Auth](https://www.better-auth.com), with email + password, GitHub and Google sign-in. Sessions are stored in Postgres (`sessions` table) and identified by a cookie.
+- **Considered:** Auth.js (NextAuth), which the original schema was shaped for.
+- **Why:** since September 2025 Auth.js has been maintained by the Better Auth team, and new projects are pointed to Better Auth. It's actively developed, has a Drizzle adapter, and keeps users in our own database rather than a hosted service. Switching cost one migration, because there were no users yet.
+- **How it fits:** Better Auth owns `users`, `sessions`, `accounts` and `verifications`; Scentbook's own profile fields (`username`, `bio`, `city`) are declared to it as additional fields. One user can have several `accounts` rows, one per sign-in method. Passwords are stored only as hashes.
+- **Not yet:** email verification and password reset need an email service, so they're left for later.

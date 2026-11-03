@@ -36,7 +36,7 @@ erDiagram
 
 1. Install [Postgres.app](https://postgresapp.com), open it, and click **Initialize**.
 2. Create the database: in Postgres.app, double-click any database to open a terminal, then run `CREATE DATABASE scentbook;`
-3. Copy `.env.example` to `.env.local` and set your Mac username.
+3. Copy `.env.example` to `.env.local`, set your Mac username, and set `BETTER_AUTH_SECRET` (generate one with `openssl rand -base64 32`).
 4. Then:
 
 ```bash
@@ -46,7 +46,14 @@ npm run db:seed
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open http://localhost:3000. Email + password sign-up works straight away.
+
+### Optional: GitHub and Google sign-in
+
+The "Continue with GitHub/Google" buttons appear once their keys are in `.env.local`. Restart `npm run dev` after adding them.
+
+- **GitHub:** GitHub → Settings → Developer settings → OAuth Apps → New OAuth App. Homepage URL `http://localhost:3000`, callback URL `http://localhost:3000/api/auth/callback/github`. Copy the Client ID and a new client secret into `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`.
+- **Google:** Google Cloud Console → APIs & Services → Credentials → Create credentials → OAuth client ID (Web application). Authorized JavaScript origin `http://localhost:3000`, redirect URI `http://localhost:3000/api/auth/callback/google`. Copy them into `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`. You'll be asked to set up the OAuth consent screen first.
 
 | Script | What it does |
 |---|---|

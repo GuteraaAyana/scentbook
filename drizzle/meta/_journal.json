@@ -15,6 +15,13 @@
       "when": 1793734778183,
       "tag": "0001_fragrance_source",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793735055344,
+      "tag": "0002_better_auth",
+      "breakpoints": true
     }
   ]
 }
