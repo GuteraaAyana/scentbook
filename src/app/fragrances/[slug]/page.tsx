@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { CollectionControl, CollectionControlSkeleton } from "@/components/collection-control";
 import { AccordBars, NoteTags } from "@/components/fragrance-profile";
 import { RankingControl, RankingControlSkeleton } from "@/components/ranking-control";
+import { WearControl, WearControlSkeleton } from "@/components/wear-control";
 import { Poster } from "@/components/poster";
 import { getFragranceBySlug, getFragranceSlugs } from "@/db/fragrances";
 import { concentrationLabels, genderLabels } from "@/lib/labels";
@@ -147,8 +148,8 @@ async function FragranceDetails({ params }: Pick<PageProps<"/fragrances/[slug]">
   );
 }
 
-// Your buttons for this fragrance: rank it, and have / want / had. Both read
-// your session, so they render per request inside <Suspense>.
+// Your buttons for this fragrance: rank it, have / want / had, and log a wear.
+// All read your session, so they render per request inside <Suspense>.
 function Actions({ fragrance }: { fragrance: NonNullable<Awaited<ReturnType<typeof getFragranceBySlug>>> }) {
   return (
     <>
@@ -166,6 +167,9 @@ function Actions({ fragrance }: { fragrance: NonNullable<Awaited<ReturnType<type
       </Suspense>
       <Suspense fallback={<CollectionControlSkeleton />}>
         <CollectionControl fragranceId={fragrance.id} />
+      </Suspense>
+      <Suspense fallback={<WearControlSkeleton />}>
+        <WearControl fragranceId={fragrance.id} fragranceName={fragrance.name} />
       </Suspense>
     </>
   );

@@ -4,7 +4,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { FragranceGrid } from "@/components/fragrance-card";
+import { FragranceGrid, FragranceRow } from "@/components/fragrance-card";
+import { WearEntry } from "@/components/wear-entry";
 import { RankedList } from "@/components/ranked-list";
 import { getPublicProfile } from "@/db/profiles";
 import { auth } from "@/lib/auth";
@@ -38,7 +39,7 @@ async function Profile({ params }: Pick<PageProps<"/u/[username]">, "params">) {
   ]);
   if (!profile) notFound();
 
-  const { user, counts, topRanked, shelf } = profile;
+  const { user, counts, topRanked, shelf, mostWorn, recentWears } = profile;
   const isOwner = session?.user.username === user.username;
   const firstName = user.name.split(" ")[0];
 
@@ -84,6 +85,28 @@ async function Profile({ params }: Pick<PageProps<"/u/[username]">, "params">) {
           </p>
         )}
       </section>
+
+      {mostWorn.length > 0 && (
+        <section className="mt-14" aria-labelledby="worn-heading">
+          <h2 id="worn-heading" className="mb-4 border-b border-line pb-2 text-base font-bold">
+            Most worn
+          </h2>
+          <FragranceRow fragrances={mostWorn} />
+        </section>
+      )}
+
+      {recentWears.length > 0 && (
+        <section className="mt-14" aria-labelledby="recent-heading">
+          <h2 id="recent-heading" className="border-b border-line pb-2 text-base font-bold">
+            Recent wears
+          </h2>
+          <ol className="divide-y divide-line">
+            {recentWears.map((entry) => (
+              <WearEntry key={entry.wearId} entry={entry} showMonth />
+            ))}
+          </ol>
+        </section>
+      )}
 
       <section className="mt-14" aria-labelledby="shelf-heading">
         <h2 id="shelf-heading" className="mb-4 border-b border-line pb-2 text-base font-bold">

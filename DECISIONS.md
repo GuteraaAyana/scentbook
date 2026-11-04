@@ -113,3 +113,13 @@ This replaces the look in 009 (the dark boutique). The Fragella bottle images an
   - Curated fragrances can have a one-line `description` in `data.ts`; the first 11 were written for this change and are worth a read-through.
 - **Considered:** keeping the boutique look; the Gallery (light, retail), Color field (bold, playful) and Editorial (magazine) directions. The Diary app suits what Scentbook is for: coming back often to log, rank and compare.
 - **Not yet:** the mockup's friends' activity feed waits until following exists; no fake social data was added.
+
+## 013. The wear diary
+**Date:** 2026-11-04
+
+- **Picked:** "Log a wear" on every fragrance page records the date (defaulting to your own local today), and optionally an occasion, the weather and temperature, compliments and a note. Your diary (`/diary`) lists entries newest first, grouped by month, with totals; fragrance pages show "Worn N times, last on …"; profiles show Most worn and Recent wears.
+- **Occasion and weather are fixed lists** (shown as chips) rather than free text, so later features can count them, such as "what you reach for when it's rainy". The temperature is stored in °C as a whole number.
+- **Dates:** the date is plain `YYYY-MM-DD` from the browser, so it's your calendar day, not the server's. The server allows one day ahead of its own date to cover time zones, and rejects anything later, impossible dates (Feb 30) and anything before 1900. The rules live in `src/lib/wear.ts` with tests.
+- **Notes are private.** Wears appear on your public profile, but notes are stripped before profile data leaves the database layer, so they never reach the page or its hidden data. Only you see them, in your diary.
+- **Deleting** an entry takes two clicks (Delete, then Yes, delete), and the server only ever deletes entries belonging to the signed-in user, whatever id is sent.
+- **Not yet:** editing an entry (delete and log it again for now).

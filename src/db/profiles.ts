@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { db } from ".";
 import { listCollection } from "./collections";
 import { listRankings } from "./rankings";
+import { listMostWorn, listWears } from "./wears";
 import { users } from "./schema";
 
 // The signed-in user's own editable fields, for the settings form.
@@ -23,11 +24,20 @@ export async function getPublicProfile(username: string) {
     .where(eq(users.username, username.toLowerCase()));
   if (!user) return null;
 
-  const [collection, ranked] = await Promise.all([listCollection(user.id), listRankings(user.id)]);
+  const [collection, ranked, mostWorn, recentWears] = await Promise.all([
+    listCollection(user.id),
+    listRankings(user.id),
+    listMostWorn(user.id, 8),
+    listWears(user.id, 5),
+  ]);
   return {
     user: { name: user.name, username: user.username, bio: user.bio, joined: user.joined },
     counts: { owned: collection.have.length, wanted: collection.want.length, ranked: ranked.length },
     topRanked: ranked.slice(0, 5),
     shelf: collection.have,
+    mostWorn,
+    // Diary notes can be personal, so they never leave this function for a
+    // public page.
+    recentWears: recentWears.map((wear) => ({ ...wear, note: null })),
   };
 }

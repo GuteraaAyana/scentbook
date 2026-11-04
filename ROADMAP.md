@@ -17,17 +17,18 @@ What's done, what's next, and what's planned for later. The reasoning behind eac
 - [x] Ranking: loved / fine / disliked, "which do you prefer?" comparisons, scores out of 10, My rankings page (Day 4, DECISIONS 010)
 - [x] Profiles: public /u/[username] with top ranked and shelf; /settings for username, bio, private city (DECISIONS 011)
 - [x] Redesign: diary-app look with accord-coloured posters, community scores and 'How it unfolds' writing (DECISIONS 012)
+- [x] Wear diary: Log a wear, /diary by month, worn counts, Most worn and Recent wears on profiles (DECISIONS 013)
 
 ## Now
 - [ ] Add GitHub and Google OAuth keys to `.env.local` (see README)
 
 ## Next
-- [ ] Wear diary: log what you wore, when, the occasion and weather (the `wears` table is ready)
 - [ ] Reviews: a short written review with longevity and sillage ratings (the `reviews` table is ready)
 - [ ] Follow people and see what they rank and wear (the `follows` table is ready)
 - [ ] "What to wear today": a pick from your shelf based on your city's weather
 
 ## Later
+- [ ] Edit a diary entry (for now: delete and log it again)
 - [ ] **User fragrance submissions with admin review.** Signed-in users submit a missing fragrance; it waits in a queue until an admin approves it, so nothing unverified reaches the catalog.
   - Depends on login, plus an admin role on `users`.
   - A `fragrance_submissions` table: the proposed fragrance as JSON, `status` (pending / approved / rejected), submitter, reviewer, reason for rejecting.

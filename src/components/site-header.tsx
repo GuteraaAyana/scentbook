@@ -59,7 +59,10 @@ async function UserMenu() {
       <Link href="/collection" className={`${navLink} hidden sm:inline`}>
         Collection
       </Link>
-      <Link href="/rankings" className={navLink}>
+      <Link href="/diary" className={navLink}>
+        Diary
+      </Link>
+      <Link href="/rankings" className={`${navLink} hidden sm:inline`}>
         Rankings
       </Link>
       <SignOutButton className={`${navLink} hidden md:inline`} />
