@@ -2,7 +2,7 @@
 // Saves the profile settings form. A Server Action is a public endpoint, so
 // it checks the session and validates everything itself.
 import { eq } from "drizzle-orm";
-import { refresh } from "next/cache";
+import { refresh, updateTag } from "next/cache";
 import { headers } from "next/headers";
 import { db } from "@/db";
 import { users } from "@/db/schema";
@@ -48,6 +48,7 @@ export async function updateProfile(_previous: ProfileFormState, form: FormData)
     throw error;
   }
 
+  updateTag("reviews"); // cached reviews show the author's name and username
   refresh();
   const saved = { username: result.value.username, bio: result.value.bio ?? "", city: result.value.city ?? "" };
   return { values: saved, errors: {}, saved: true, message: null };

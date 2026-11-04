@@ -9,7 +9,16 @@ import { fragrances, wears } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { type WearErrors, type WearInput, validateWear } from "@/lib/wear";
 
-export type WearFormState = { errors: WearErrors; message: string | null; saved: number };
+// `values` and `attempt` come back with errors: React resets a form after its
+// action runs, so the form is rebuilt (keyed on `attempt`) from what was sent
+// instead of losing what the person typed.
+export type WearFormState = {
+  errors: WearErrors;
+  message: string | null;
+  saved: number;
+  values: WearInput | null;
+  attempt: number;
+};
 
 async function currentUserId() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -20,9 +29,6 @@ async function currentUserId() {
 // can tell a fresh save from an old one.
 export async function logWear(fragranceId: number, previous: WearFormState, form: FormData): Promise<WearFormState> {
   const userId = await currentUserId();
-  if (!userId) return { ...previous, message: "Your session ended. Sign in again to save." };
-  if (!Number.isInteger(fragranceId)) return { ...previous, message: "Unknown fragrance." };
-
   const input: WearInput = {
     wornOn: String(form.get("wornOn") ?? ""),
     occasion: String(form.get("occasion") ?? ""),
@@ -31,16 +37,27 @@ export async function logWear(fragranceId: number, previous: WearFormState, form
     compliments: String(form.get("compliments") ?? ""),
     note: String(form.get("note") ?? ""),
   };
+  const failed = (changes: Partial<WearFormState>) => ({
+    ...previous,
+    errors: {},
+    message: null,
+    ...changes,
+    values: input,
+    attempt: previous.attempt + 1,
+  });
+  if (!userId) return failed({ message: "Your session ended. Sign in again to save." });
+  if (!Number.isInteger(fragranceId)) return failed({ message: "Unknown fragrance." });
+
   const today = new Date().toISOString().slice(0, 10);
   const result = validateWear(input, today);
-  if (!result.ok) return { ...previous, errors: result.errors, message: null };
+  if (!result.ok) return failed({ errors: result.errors });
 
   const [exists] = await db.select({ id: fragrances.id }).from(fragrances).where(eq(fragrances.id, fragranceId));
-  if (!exists) return { ...previous, message: "Unknown fragrance." };
+  if (!exists) return failed({ message: "Unknown fragrance." });
 
   await db.insert(wears).values({ userId, fragranceId, ...result.value });
   refresh();
-  return { errors: {}, message: null, saved: previous.saved + 1 };
+  return { errors: {}, message: null, saved: previous.saved + 1, values: null, attempt: previous.attempt + 1 };
 }
 
 export async function deleteWear(wearId: number) {

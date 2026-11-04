@@ -4,6 +4,8 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { logWear, type WearFormState } from "@/lib/actions/wear";
 import { NOTE_MAX, OCCASIONS, WEATHER } from "@/lib/wear";
 import { primaryButton, secondaryButton, textField } from "@/lib/ui";
+import { ChipChoice } from "./chip-choice";
+import { CountedTextarea } from "./counted-textarea";
 
 const fieldError = "mt-1.5 block text-sm text-danger";
 const legend = "text-sm font-bold";
@@ -14,37 +16,18 @@ function localToday() {
   return new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
 }
 
-// A set of radio buttons drawn as chips. Real radios, so arrow keys and
-// screen readers work as usual. Picking nothing is allowed.
-function ChipChoice({ name, options, label }: { name: string; options: string[]; label: string }) {
-  return (
-    <fieldset>
-      <legend className={legend}>{label}</legend>
-      <div className="mt-2 flex flex-wrap gap-1.5">
-        {options.map((option) => (
-          <label key={option} className="cursor-pointer">
-            <input type="radio" name={name} value={option} className="peer sr-only" />
-            <span className="inline-block rounded-md bg-raised px-3 py-1.5 text-sm font-semibold transition-colors peer-checked:bg-gold peer-checked:text-gold-ink peer-focus-visible:outline-2 peer-focus-visible:outline-gold">
-              {option}
-            </span>
-          </label>
-        ))}
-      </div>
-    </fieldset>
-  );
-}
-
 export function LogWearFlow({ fragranceId, fragranceName }: { fragranceId: number; fragranceName: string }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [state, save, pending] = useActionState(logWear.bind(null, fragranceId), {
     errors: {},
     message: null,
     saved: 0,
+    values: null,
+    attempt: 0,
   } satisfies WearFormState);
   // Set when the dialog opens, so the date is the person's today, not the server's.
   const [today, setToday] = useState("");
   const [formKey, setFormKey] = useState(0);
-  const [noteLength, setNoteLength] = useState(0);
   const [justSaved, setJustSaved] = useState(false);
 
   // Close after a successful save.
@@ -57,15 +40,23 @@ export function LogWearFlow({ fragranceId, fragranceName }: { fragranceId: numbe
     }
   }, [state.saved]);
 
+  // The attempt the dialog was opened at: anything returned since belongs to
+  // this opening; anything older (an error from last time) doesn't.
+  const [openedAt, setOpenedAt] = useState(0);
+  const current = state.attempt > openedAt;
+  const errors = current ? state.errors : {};
+  const message = current ? state.message : null;
+  // After an error, rebuild the form from what was sent (React resets forms
+  // after an action); otherwise start empty.
+  const values = current ? state.values : null;
+
   function open() {
     setToday(localToday());
     setFormKey((k) => k + 1); // a fresh, empty form each time
-    setNoteLength(0);
+    setOpenedAt(state.attempt);
     setJustSaved(false);
     dialog.current?.showModal();
   }
-
-  const { errors } = state;
 
   return (
     <>
@@ -85,13 +76,13 @@ export function LogWearFlow({ fragranceId, fragranceName }: { fragranceId: numbe
           Log a wear of {fragranceName}
         </h2>
 
-        <form key={formKey} action={save} className="mt-6 grid gap-5" noValidate>
+        <form key={`${formKey}-${state.attempt}`} action={save} className="mt-6 grid gap-5" noValidate>
           <label className="block">
             <span className={legend}>Date</span>
             <input
               type="date"
               name="wornOn"
-              defaultValue={today}
+              defaultValue={values?.wornOn ?? today}
               max={today}
               required
               aria-invalid={Boolean(errors.wornOn)}
@@ -100,11 +91,11 @@ export function LogWearFlow({ fragranceId, fragranceName }: { fragranceId: numbe
             {errors.wornOn && <span className={fieldError}>{errors.wornOn}</span>}
           </label>
 
-          <ChipChoice name="occasion" options={OCCASIONS} label="Occasion" />
+          <ChipChoice name="occasion" options={OCCASIONS.map((value) => ({ value }))} label="Occasion" defaultValue={values?.occasion} />
           {errors.occasion && <span className={fieldError}>{errors.occasion}</span>}
 
           <div className="grid gap-3 sm:grid-cols-[1fr_7rem] sm:items-end">
-            <ChipChoice name="weather" options={WEATHER} label="Weather" />
+            <ChipChoice name="weather" options={WEATHER.map((value) => ({ value }))} label="Weather" defaultValue={values?.weather} />
             <label className="block">
               <span className={legend}>Temperature</span>
               <span className="relative block">
@@ -115,6 +106,7 @@ export function LogWearFlow({ fragranceId, fragranceName }: { fragranceId: numbe
                   min={-50}
                   max={60}
                   step={1}
+                  defaultValue={values?.temperatureC}
                   aria-invalid={Boolean(errors.temperatureC)}
                   className={`${textField} pr-9`}
                 />
@@ -136,7 +128,7 @@ export function LogWearFlow({ fragranceId, fragranceName }: { fragranceId: numbe
               min={0}
               max={99}
               step={1}
-              defaultValue={0}
+              defaultValue={values?.compliments || 0}
               aria-invalid={Boolean(errors.compliments)}
               className={`${textField} w-24`}
             />
@@ -145,23 +137,19 @@ export function LogWearFlow({ fragranceId, fragranceName }: { fragranceId: numbe
 
           <label className="block">
             <span className={legend}>Note</span>
-            <textarea
+            <CountedTextarea
+              id="wear-note"
               name="note"
-              rows={3}
-              maxLength={NOTE_MAX}
-              onChange={(e) => setNoteLength(e.target.value.length)}
+              max={NOTE_MAX}
+              defaultValue={values?.note}
+              error={errors.note}
               placeholder="How did it wear? How long did it last?"
-              aria-invalid={Boolean(errors.note)}
-              className={`${textField} resize-y`}
             />
-            <span className={errors.note ? fieldError : "mt-1.5 block text-sm text-muted"}>
-              {errors.note ?? `${noteLength} of ${NOTE_MAX}`}
-            </span>
           </label>
 
-          {state.message && (
+          {message && (
             <p role="alert" className="text-sm text-danger">
-              {state.message}
+              {message}
             </p>
           )}
 

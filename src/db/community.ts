@@ -8,16 +8,15 @@ import { rankings } from "./schema";
 
 export type CommunityScore = { score: number; rankedBy: number; lovedShare: number };
 
-export async function getCommunityScores(fragranceIds: number[]): Promise<Map<number, CommunityScore>> {
-  const result = new Map<number, CommunityScore>();
-  if (fragranceIds.length === 0) return result;
-
-  // A score depends on the fragrance's place among everything else that user
-  // ranked in the same bucket, so positions are worked out over each whole
-  // bucket first, then narrowed to the fragrances asked about.
+// Every ranking of these fragrances with its place in that user's bucket. A
+// score depends on the fragrance's place among everything else that user
+// ranked in the same bucket, so positions are worked out over each whole
+// bucket first, then narrowed to the fragrances asked about.
+async function positionedRankings(fragranceIds: number[]) {
   const positioned = db.$with("positioned").as(
     db
       .select({
+        userId: rankings.userId,
         fragranceId: rankings.fragranceId,
         sentiment: rankings.sentiment,
         index: sql<number>`(row_number() over (partition by ${rankings.userId}, ${rankings.sentiment} order by ${rankings.sortKey} desc) - 1)::int`.as("index"),
@@ -25,11 +24,21 @@ export async function getCommunityScores(fragranceIds: number[]): Promise<Map<nu
       })
       .from(rankings),
   );
-  const rows = await db
-    .with(positioned)
-    .select()
-    .from(positioned)
-    .where(inArray(positioned.fragranceId, fragranceIds));
+  return db.with(positioned).select().from(positioned).where(inArray(positioned.fragranceId, fragranceIds));
+}
+
+// Each person's own score for one fragrance (user id → score), for showing
+// next to their review.
+export async function getScoresByUser(fragranceId: number): Promise<Map<string, number>> {
+  const rows = await positionedRankings([fragranceId]);
+  return new Map(rows.map((r) => [r.userId, scoreFor(r.sentiment as Sentiment, r.index, r.size)]));
+}
+
+export async function getCommunityScores(fragranceIds: number[]): Promise<Map<number, CommunityScore>> {
+  const result = new Map<number, CommunityScore>();
+  if (fragranceIds.length === 0) return result;
+
+  const rows = await positionedRankings(fragranceIds);
 
   const totals = new Map<number, { sum: number; count: number; loved: number }>();
   for (const row of rows) {

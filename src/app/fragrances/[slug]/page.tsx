@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { CollectionControl, CollectionControlSkeleton } from "@/components/collection-control";
 import { AccordBars, NoteTags } from "@/components/fragrance-profile";
 import { RankingControl, RankingControlSkeleton } from "@/components/ranking-control";
+import { ReviewsSection } from "@/components/reviews-section";
 import { WearControl, WearControlSkeleton } from "@/components/wear-control";
 import { Poster } from "@/components/poster";
 import { getFragranceBySlug, getFragranceSlugs } from "@/db/fragrances";
@@ -143,6 +144,10 @@ async function FragranceDetails({ params }: Pick<PageProps<"/fragrances/[slug]">
             <AccordBars accords={fragrance.accords} />
           </div>
         </section>
+      </div>
+
+      <div className={`${pageContainer} pb-14`}>
+        <ReviewsSection fragranceId={fragrance.id} fragranceName={fragrance.name} />
       </div>
     </article>
   );

@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { db } from ".";
 import { listCollection } from "./collections";
 import { listRankings } from "./rankings";
+import { listUserReviews } from "./reviews";
 import { listMostWorn, listWears } from "./wears";
 import { users } from "./schema";
 
@@ -24,11 +25,12 @@ export async function getPublicProfile(username: string) {
     .where(eq(users.username, username.toLowerCase()));
   if (!user) return null;
 
-  const [collection, ranked, mostWorn, recentWears] = await Promise.all([
+  const [collection, ranked, mostWorn, recentWears, reviews] = await Promise.all([
     listCollection(user.id),
     listRankings(user.id),
     listMostWorn(user.id, 8),
     listWears(user.id, 5),
+    listUserReviews(user.id, 3),
   ]);
   return {
     user: { name: user.name, username: user.username, bio: user.bio, joined: user.joined },
@@ -36,6 +38,7 @@ export async function getPublicProfile(username: string) {
     topRanked: ranked.slice(0, 5),
     shelf: collection.have,
     mostWorn,
+    reviews,
     // Diary notes can be personal, so they never leave this function for a
     // public page.
     recentWears: recentWears.map((wear) => ({ ...wear, note: null })),

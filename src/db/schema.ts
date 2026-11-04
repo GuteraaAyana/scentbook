@@ -353,6 +353,7 @@ export const reviews = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }), // set when edited
   },
   (t) => [
     unique().on(t.userId, t.fragranceId), // one review per person per fragrance

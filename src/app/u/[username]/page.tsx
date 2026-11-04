@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { FragranceGrid, FragranceRow } from "@/components/fragrance-card";
+import { Poster } from "@/components/poster";
 import { WearEntry } from "@/components/wear-entry";
 import { RankedList } from "@/components/ranked-list";
 import { getPublicProfile } from "@/db/profiles";
@@ -39,7 +40,7 @@ async function Profile({ params }: Pick<PageProps<"/u/[username]">, "params">) {
   ]);
   if (!profile) notFound();
 
-  const { user, counts, topRanked, shelf, mostWorn, recentWears } = profile;
+  const { user, counts, topRanked, shelf, mostWorn, recentWears, reviews } = profile;
   const isOwner = session?.user.username === user.username;
   const firstName = user.name.split(" ")[0];
 
@@ -85,6 +86,33 @@ async function Profile({ params }: Pick<PageProps<"/u/[username]">, "params">) {
           </p>
         )}
       </section>
+
+      {reviews.length > 0 && (
+        <section className="mt-14" aria-labelledby="reviews-heading">
+          <h2 id="reviews-heading" className="border-b border-line pb-2 text-base font-bold">
+            Latest reviews
+          </h2>
+          <ul className="divide-y divide-line">
+            {reviews.map((item) => (
+              <li key={item.slug}>
+                <Link
+                  href={`/fragrances/${item.slug}#reviews-heading`}
+                  className="group grid grid-cols-[2.75rem_minmax(0,1fr)] gap-3 py-4 sm:grid-cols-[3rem_minmax(0,1fr)] sm:gap-4"
+                >
+                  <Poster name={item.name} imageUrl={item.imageUrl} accords={item.accords} sizes="3rem" />
+                  <span className="min-w-0">
+                    <span className="font-bold group-hover:underline group-hover:underline-offset-4">{item.name}</span>
+                    <span className="text-sm text-muted"> {item.brand}</span>
+                    <span className="mt-1 line-clamp-3 block max-w-prose text-sm leading-relaxed text-muted">
+                      {item.review.body}
+                    </span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {mostWorn.length > 0 && (
         <section className="mt-14" aria-labelledby="worn-heading">

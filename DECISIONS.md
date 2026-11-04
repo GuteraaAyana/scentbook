@@ -123,3 +123,12 @@ This replaces the look in 009 (the dark boutique). The Fragella bottle images an
 - **Notes are private.** Wears appear on your public profile, but notes are stripped before profile data leaves the database layer, so they never reach the page or its hidden data. Only you see them, in your diary.
 - **Deleting** an entry takes two clicks (Delete, then Yes, delete), and the server only ever deletes entries belonging to the signed-in user, whatever id is sent.
 - **Not yet:** editing an entry (delete and log it again for now).
+
+## 014. Reviews
+**Date:** 2026-11-04
+
+- **Picked:** one written review per person per fragrance, with optional longevity and sillage ratings. Writing again edits it (marked "edited"; migration 0003 adds `reviews.updated_at`), and it can be deleted. Fragrance pages show the averages and everyone's reviews, newest first, each with that reviewer's own ranking score when they've ranked it; profiles show your latest three.
+- **Ratings in words, not numbers:** longevity and sillage are stored as 1–5 but chosen and shown as plain descriptions ("Half a day", "Fills the room"). Averages are shown as the nearest description plus a bar. The text is 10–2,000 characters, keeping paragraph breaks. The rules live in `src/lib/review.ts` with tests.
+- **Caching:** a fragrance's review list is the same for everyone, so it's cached and tagged `reviews:<id>`. Saving or deleting a review expires that tag, editing your profile expires "reviews" (reviews show your name), and ranking expires "rankings" (reviews show your score). Your own Write/Edit button is per request.
+- **Forms keep what you typed:** React 19 resets a form after its action runs, which would wipe a review (or diary entry) whenever validation failed. The actions return what was sent and the form is rebuilt from it; errors from a previous opening of a dialog aren't shown again.
+- **Not yet:** reporting or hiding abusive reviews, and rate limiting. Needed before Scentbook is public.
