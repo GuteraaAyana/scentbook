@@ -56,7 +56,7 @@ async function CatalogPage({ searchParams }: Pick<PageProps<"/fragrances">, "sea
       </p>
 
       <div className="mt-10">
-        <FragranceGrid fragrances={fragrances} />
+        <FragranceGrid fragrances={fragrances} aboveFold={6} />
       </div>
 
       {pageCount > 1 && (

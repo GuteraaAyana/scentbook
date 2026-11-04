@@ -21,12 +21,13 @@ What's done, what's next, and what's planned for later. The reasoning behind eac
 - [x] Reviews: write/edit/delete with longevity and sillage, averages and reviewer scores on fragrance pages, latest on profiles (DECISIONS 014)
 - [x] Following: follow/unfollow, follower lists, /feed of rankings, wears, reviews and collection changes, /people (DECISIONS 015)
 - [x] What to wear today: a weather-based pick from your shelf on the home page (DECISIONS 016)
+- [x] Lighthouse after the redesign: fixed browse image loading and a layout shift on fragrance pages (PERFORMANCE.md)
 
 ## Now
 - [ ] Add GitHub and Google OAuth keys to `.env.local` (see README)
 
 ## Next
-- [ ] Re-run Lighthouse and update PERFORMANCE.md (the redesign added web fonts, bottle photos and per-user sections)
+- [ ] Decide on resizing bottle photos (browse LCP is 3.2 s on simulated slow 4G; see PERFORMANCE.md)
 - [ ] Report and hide abusive reviews; rate limiting on sign-up and posting (needed before going public)
 - [ ] Deploy: production database, hosting and a real domain (README lists the planned AWS setup)
 

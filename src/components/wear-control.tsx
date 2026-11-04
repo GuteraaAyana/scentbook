@@ -29,6 +29,7 @@ export async function WearControl({ fragranceId, fragranceName }: { fragranceId:
   );
 }
 
+// Nothing while loading, for the same reason as CollectionControlSkeleton.
 export function WearControlSkeleton() {
-  return <div className="h-10 w-28 animate-pulse rounded-md bg-surface" />;
+  return null;
 }

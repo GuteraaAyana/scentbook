@@ -94,8 +94,11 @@ async function FragranceDetails({ params }: Pick<PageProps<"/fragrances/[slug]">
             {fragrance.description && <p className="mt-4 max-w-prose text-lg leading-relaxed">{fragrance.description}</p>}
           </div>
 
-          {/* Under the title beside the poster; full width under it on phones. */}
-          <div className="col-span-2 flex flex-wrap items-start gap-x-6 gap-y-3 sm:col-span-1 sm:col-start-2">
+          {/* Under the title beside the poster; full width under it on phones.
+              min-h-10 holds one row of buttons while they load, so nothing
+              below jumps when they arrive (or when a signed-out "Sign in"
+              line replaces them). */}
+          <div className="col-span-2 flex min-h-10 flex-wrap items-center gap-x-6 gap-y-3 sm:col-span-1 sm:col-start-2">
             <Actions fragrance={fragrance} />
           </div>
 

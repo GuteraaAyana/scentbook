@@ -29,8 +29,10 @@ export async function getFragranceSlugs() {
   return rows.map((r) => r.slug);
 }
 
-// Fragrances per browse page (divisible by the 2- and 3-column grids).
-export const PAGE_SIZE = 48;
+// Fragrances per browse page: divisible by every grid width (3, 4, 6, 8
+// columns). 24, not 48: bottle photos come full size from Fragella, and on a
+// phone's connection 48 of them crowd out the ones on screen (PERFORMANCE.md).
+export const PAGE_SIZE = 24;
 
 // The columns a fragrance card shows. Select these and join `brands`.
 export const cardColumns = {

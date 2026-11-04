@@ -18,6 +18,8 @@ export async function CollectionControl({ fragranceId }: { fragranceId: number }
   return <CollectionButtons fragranceId={fragranceId} initialStatus={status} />;
 }
 
+// Nothing while loading: the ranking placeholder beside it holds the row's
+// height, and extra placeholders would wrap on phones and then collapse.
 export function CollectionControlSkeleton() {
-  return <div className="h-10 w-64 animate-pulse rounded-md bg-surface" />;
+  return null;
 }

@@ -17,7 +17,7 @@ export async function ReviewsSection({ fragranceId, fragranceName }: { fragrance
 
   return (
     <section aria-labelledby="reviews-heading">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line pb-2">
+      <div className="flex min-h-12 flex-wrap items-end justify-between gap-3 border-b border-line pb-2">
         <h2 id="reviews-heading" className="text-sm font-bold text-muted">
           Reviews{total > 0 && ` (${total})`}
         </h2>

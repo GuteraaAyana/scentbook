@@ -6,7 +6,15 @@ const posterSizes = "(min-width: 1024px) 12vw, (min-width: 640px) 20vw, 33vw";
 
 // A fragrance in a row or grid: its poster (with the community score, once
 // anyone has ranked it), then name and brand.
-export function FragranceCard({ fragrance }: { fragrance: FragranceCardData }) {
+export function FragranceCard({
+  fragrance,
+  priority,
+  eager,
+}: {
+  fragrance: FragranceCardData;
+  priority?: boolean;
+  eager?: boolean;
+}) {
   return (
     <Link href={`/fragrances/${fragrance.slug}`} className="group block rounded-md">
       <Poster
@@ -14,6 +22,8 @@ export function FragranceCard({ fragrance }: { fragrance: FragranceCardData }) {
         imageUrl={fragrance.imageUrl}
         accords={fragrance.accords}
         score={fragrance.community?.score}
+        priority={priority}
+        eager={eager}
         sizes={posterSizes}
         className="transition-shadow group-hover:shadow-[inset_0_0_0_2px_var(--gold)]"
       />
@@ -25,12 +35,16 @@ export function FragranceCard({ fragrance }: { fragrance: FragranceCardData }) {
 
 const gridColumns = "grid grid-cols-3 gap-x-3 gap-y-5 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8";
 
-export function FragranceGrid({ fragrances }: { fragrances: FragranceCardData[] }) {
+// `aboveFold`: how many posters are on screen as the page opens on a phone
+// (three per row). Those load straight away, the first row at high priority;
+// lazy loading them would delay the page's largest image. (Giving all of them
+// high priority was slower: they just compete with each other.)
+export function FragranceGrid({ fragrances, aboveFold = 0 }: { fragrances: FragranceCardData[]; aboveFold?: number }) {
   return (
     <ul className={gridColumns}>
-      {fragrances.map((fragrance) => (
+      {fragrances.map((fragrance, i) => (
         <li key={fragrance.slug} className="min-w-0">
-          <FragranceCard fragrance={fragrance} />
+          <FragranceCard fragrance={fragrance} priority={i < Math.min(3, aboveFold)} eager={i < aboveFold} />
         </li>
       ))}
     </ul>
