@@ -140,3 +140,12 @@ This replaces the look in 009 (the dark boutique). The Fragella bottle images an
 - **Building the feed:** each kind of activity is read separately (latest N each, from the people you follow), then merged by time (`mergeFeed` in `src/lib/feed.ts`, tested). That's simpler and easier to index than one big UNION query, and fine at this size. Ranking scores in the feed come from the same position-based calculation as everywhere else.
 - **Privacy:** diary notes never appear in the feed (the query doesn't select them). People without a username have no public profile, so they're neither listed nor counted as followers, which keeps counts and lists consistent. Following yourself is blocked both in the action and by a database check.
 - **Not yet:** notifications ("Maya followed you"), and paging through older feed items (the feed shows the latest 60).
+
+## 016. "What to wear today"
+**Date:** 2026-11-04
+
+- **Picked:** a home-page pick from the fragrances you own (marked Have it), based on your city's current weather, with a one-line reason and two alternatives. It needs a city (set in settings) and at least one owned fragrance; otherwise it explains what to add.
+- **Weather from Open-Meteo:** free, no API key, no account. Only the city name (to find coordinates) and rounded coordinates (for the weather) are sent, nothing about the person, and the city itself stays private on Scentbook (DECISIONS 011). City lookups are cached for days and the weather for about an hour, shared across everyone in the same place. A failed or slow request (4 s timeout) shows "Couldn't get the weather" rather than holding up the page.
+- **How it picks** (`src/lib/wear-today.ts`, 10 tests): each accord has a weather preference by temperature band (cold < 10 °C, mild < 18, warm < 25, hot), adjusted for rain, snow and humidity: fresh and citrus for heat, amber, vanilla and tobacco for cold, woods and moss in the rain. A fragrance's fit is the strength-weighted average of its accords' preferences. Your own ranking score adds to it, and anything worn in the last few days is nudged down so the pick rotates. The weights are hand-tuned and simple on purpose; the reason text names the accords that made the difference.
+- **Considered:** an AI model choosing for you. Rejected for now: a rule anyone can read is easier to trust and to tune, and costs nothing per visit.
+- **Not yet:** learning from your diary (what you actually wear in which weather), and filling the weather into Log a wear automatically.

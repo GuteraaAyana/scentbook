@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { FragranceRow } from "@/components/fragrance-card";
 import { HomeFeed } from "@/components/home-feed";
+import { TodayPick } from "@/components/today-pick";
 import type { FragranceCardData } from "@/db/fragrances";
 import { listCommunityHighlights, listFeaturedFragrances, listFragrances } from "@/db/fragrances";
 import { pageContainer, primaryButton, rowHeading, secondaryButton } from "@/lib/ui";
@@ -33,6 +34,10 @@ export default async function Home() {
           </Link>
         </div>
       </section>
+
+      <Suspense>
+        <TodayPick />
+      </Suspense>
 
       <Suspense>
         <HomeFeed />

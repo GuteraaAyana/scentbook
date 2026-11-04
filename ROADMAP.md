@@ -20,16 +20,19 @@ What's done, what's next, and what's planned for later. The reasoning behind eac
 - [x] Wear diary: Log a wear, /diary by month, worn counts, Most worn and Recent wears on profiles (DECISIONS 013)
 - [x] Reviews: write/edit/delete with longevity and sillage, averages and reviewer scores on fragrance pages, latest on profiles (DECISIONS 014)
 - [x] Following: follow/unfollow, follower lists, /feed of rankings, wears, reviews and collection changes, /people (DECISIONS 015)
+- [x] What to wear today: a weather-based pick from your shelf on the home page (DECISIONS 016)
 
 ## Now
 - [ ] Add GitHub and Google OAuth keys to `.env.local` (see README)
 
 ## Next
-- [ ] "What to wear today": a pick from your shelf based on your city's weather
+- [ ] Re-run Lighthouse and update PERFORMANCE.md (the redesign added web fonts, bottle photos and per-user sections)
+- [ ] Report and hide abusive reviews; rate limiting on sign-up and posting (needed before going public)
+- [ ] Deploy: production database, hosting and a real domain (README lists the planned AWS setup)
 
 ## Later
+- [ ] Learn from your diary which fragrances you wear in which weather; prefill the weather when logging a wear
 - [ ] Notifications (new followers) and paging through older feed items
-- [ ] Report and hide abusive reviews; rate limiting (before going public)
 - [ ] Edit a diary entry (for now: delete and log it again)
 - [ ] **User fragrance submissions with admin review.** Signed-in users submit a missing fragrance; it waits in a queue until an admin approves it, so nothing unverified reaches the catalog.
   - Depends on login, plus an admin role on `users`.
