@@ -4,13 +4,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { FollowButton } from "@/components/follow-button";
 import { FragranceGrid, FragranceRow } from "@/components/fragrance-card";
 import { Poster } from "@/components/poster";
 import { WearEntry } from "@/components/wear-entry";
 import { RankedList } from "@/components/ranked-list";
 import { getPublicProfile } from "@/db/profiles";
 import { auth } from "@/lib/auth";
-import { pageContainer, secondaryButton } from "@/lib/ui";
+import { pageContainer, primaryButton, secondaryButton } from "@/lib/ui";
 
 export async function generateMetadata(props: PageProps<"/u/[username]">): Promise<Metadata> {
   const { username } = await props.params;
@@ -34,13 +35,11 @@ const joinedFormat = new Intl.DateTimeFormat("en", { month: "long", year: "numer
 async function Profile({ params }: Pick<PageProps<"/u/[username]">, "params">) {
   await connection();
   const { username } = await params;
-  const [profile, session] = await Promise.all([
-    getPublicProfile(username),
-    auth.api.getSession({ headers: await headers() }),
-  ]);
+  const session = await auth.api.getSession({ headers: await headers() });
+  const profile = await getPublicProfile(username, session?.user.id);
   if (!profile) notFound();
 
-  const { user, counts, topRanked, shelf, mostWorn, recentWears, reviews } = profile;
+  const { user, counts, follow, topRanked, shelf, mostWorn, recentWears, reviews } = profile;
   const isOwner = session?.user.username === user.username;
   const firstName = user.name.split(" ")[0];
 
@@ -52,11 +51,25 @@ async function Profile({ params }: Pick<PageProps<"/u/[username]">, "params">) {
           <p className="mt-2 text-muted">
             @{user.username}, joined {joinedFormat.format(user.joined)}
           </p>
+          <p className="mt-2 flex gap-4 text-sm">
+            <Link href={`/u/${user.username}/followers`} className="hover:underline hover:underline-offset-4">
+              <b>{follow.followers}</b> <span className="text-muted">{follow.followers === 1 ? "follower" : "followers"}</span>
+            </Link>
+            <Link href={`/u/${user.username}/following`} className="hover:underline hover:underline-offset-4">
+              <b>{follow.following}</b> <span className="text-muted">following</span>
+            </Link>
+          </p>
           {user.bio && <p className="mt-6 text-lg leading-relaxed">{user.bio}</p>}
         </div>
-        {isOwner && (
+        {isOwner ? (
           <Link href="/settings" className={secondaryButton}>
             Edit profile
+          </Link>
+        ) : session ? (
+          <FollowButton username={user.username!} initiallyFollowing={follow.viewerFollows} />
+        ) : (
+          <Link href={`/sign-in?next=/u/${user.username}`} className={primaryButton}>
+            Follow
           </Link>
         )}
       </header>

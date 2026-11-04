@@ -132,3 +132,11 @@ This replaces the look in 009 (the dark boutique). The Fragella bottle images an
 - **Caching:** a fragrance's review list is the same for everyone, so it's cached and tagged `reviews:<id>`. Saving or deleting a review expires that tag, editing your profile expires "reviews" (reviews show your name), and ranking expires "rankings" (reviews show your score). Your own Write/Edit button is per request.
 - **Forms keep what you typed:** React 19 resets a form after its action runs, which would wipe a review (or diary entry) whenever validation failed. The actions return what was sent and the form is rebuilt from it; errors from a previous opening of a dialog aren't shown again.
 - **Not yet:** reporting or hiding abusive reviews, and rate limiting. Needed before Scentbook is public.
+
+## 015. Following and the activity feed
+**Date:** 2026-11-04
+
+- **Picked:** follow anyone with a public profile (a username). Profiles show follower and following counts, each opening a list, and a Follow / Following button. `/feed` shows what the people you follow have ranked (with their score), worn (with the occasion), reviewed (with an excerpt) and added to their collection, newest first; the home page shows the latest four once you follow someone active. `/people` lists everyone with a public profile, so there's somewhere to find people.
+- **Building the feed:** each kind of activity is read separately (latest N each, from the people you follow), then merged by time (`mergeFeed` in `src/lib/feed.ts`, tested). That's simpler and easier to index than one big UNION query, and fine at this size. Ranking scores in the feed come from the same position-based calculation as everywhere else.
+- **Privacy:** diary notes never appear in the feed (the query doesn't select them). People without a username have no public profile, so they're neither listed nor counted as followers, which keeps counts and lists consistent. Following yourself is blocked both in the action and by a database check.
+- **Not yet:** notifications ("Maya followed you"), and paging through older feed items (the feed shows the latest 60).

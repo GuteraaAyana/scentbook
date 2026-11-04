@@ -19,15 +19,16 @@ What's done, what's next, and what's planned for later. The reasoning behind eac
 - [x] Redesign: diary-app look with accord-coloured posters, community scores and 'How it unfolds' writing (DECISIONS 012)
 - [x] Wear diary: Log a wear, /diary by month, worn counts, Most worn and Recent wears on profiles (DECISIONS 013)
 - [x] Reviews: write/edit/delete with longevity and sillage, averages and reviewer scores on fragrance pages, latest on profiles (DECISIONS 014)
+- [x] Following: follow/unfollow, follower lists, /feed of rankings, wears, reviews and collection changes, /people (DECISIONS 015)
 
 ## Now
 - [ ] Add GitHub and Google OAuth keys to `.env.local` (see README)
 
 ## Next
-- [ ] Follow people and see what they rank and wear (the `follows` table is ready)
 - [ ] "What to wear today": a pick from your shelf based on your city's weather
 
 ## Later
+- [ ] Notifications (new followers) and paging through older feed items
 - [ ] Report and hide abusive reviews; rate limiting (before going public)
 - [ ] Edit a diary entry (for now: delete and log it again)
 - [ ] **User fragrance submissions with admin review.** Signed-in users submit a missing fragrance; it waits in a queue until an admin approves it, so nothing unverified reaches the catalog.

@@ -3,6 +3,7 @@
 import { eq } from "drizzle-orm";
 import { db } from ".";
 import { listCollection } from "./collections";
+import { getFollowCounts, isFollowing } from "./follows";
 import { listRankings } from "./rankings";
 import { listUserReviews } from "./reviews";
 import { listMostWorn, listWears } from "./wears";
@@ -18,23 +19,27 @@ export async function getOwnProfile(userId: string) {
 }
 
 // Everything on /u/[username], or null if nobody has that username.
-export async function getPublicProfile(username: string) {
+// `viewerId` (the signed-in visitor, if any) adds whether they follow them.
+export async function getPublicProfile(username: string, viewerId?: string) {
   const [user] = await db
     .select({ id: users.id, name: users.name, username: users.username, bio: users.bio, joined: users.createdAt })
     .from(users)
     .where(eq(users.username, username.toLowerCase()));
   if (!user) return null;
 
-  const [collection, ranked, mostWorn, recentWears, reviews] = await Promise.all([
+  const [collection, ranked, mostWorn, recentWears, reviews, followCounts, viewerFollows] = await Promise.all([
     listCollection(user.id),
     listRankings(user.id),
     listMostWorn(user.id, 8),
     listWears(user.id, 5),
     listUserReviews(user.id, 3),
+    getFollowCounts(user.id),
+    viewerId && viewerId !== user.id ? isFollowing(viewerId, user.id) : Promise.resolve(false),
   ]);
   return {
     user: { name: user.name, username: user.username, bio: user.bio, joined: user.joined },
     counts: { owned: collection.have.length, wanted: collection.want.length, ranked: ranked.length },
+    follow: { ...followCounts, viewerFollows },
     topRanked: ranked.slice(0, 5),
     shelf: collection.have,
     mostWorn,

@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { FragranceRow } from "@/components/fragrance-card";
+import { HomeFeed } from "@/components/home-feed";
 import type { FragranceCardData } from "@/db/fragrances";
 import { listCommunityHighlights, listFeaturedFragrances, listFragrances } from "@/db/fragrances";
 import { pageContainer, primaryButton, rowHeading, secondaryButton } from "@/lib/ui";
@@ -31,6 +33,10 @@ export default async function Home() {
           </Link>
         </div>
       </section>
+
+      <Suspense>
+        <HomeFeed />
+      </Suspense>
 
       {/* Community rows wait until enough has been ranked to fill a row. */}
       {topRated.length >= MIN_ROW && <Row title="Highest rated" fragrances={topRated} />}

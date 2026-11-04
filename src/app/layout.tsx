@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope } from "next/font/google";
+import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { pageContainer } from "@/lib/ui";
 import "./globals.css";
@@ -28,9 +29,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteHeader />
         {children}
         <footer className="mt-auto bg-chrome">
-          <p className={`${pageContainer} py-8 text-sm text-muted`}>
-            Fragrance data and bottle images from the Fragella API, plus entries curated by hand.
-          </p>
+          <div className={`${pageContainer} flex flex-wrap justify-between gap-4 py-8 text-sm text-muted`}>
+            <p>Fragrance data and bottle images from the Fragella API, plus entries curated by hand.</p>
+            <Link href="/people" className="font-bold hover:text-foreground">
+              People
+            </Link>
+          </div>
         </footer>
       </body>
     </html>

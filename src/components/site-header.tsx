@@ -56,16 +56,19 @@ async function UserMenu() {
   const { name, username } = session.user;
   return (
     <>
+      <Link href="/feed" className={`${navLink} hidden sm:inline`}>
+        Feed
+      </Link>
       <Link href="/collection" className={`${navLink} hidden sm:inline`}>
         Collection
       </Link>
       <Link href="/diary" className={navLink}>
         Diary
       </Link>
-      <Link href="/rankings" className={`${navLink} hidden sm:inline`}>
+      <Link href="/rankings" className={`${navLink} hidden md:inline`}>
         Rankings
       </Link>
-      <SignOutButton className={`${navLink} hidden md:inline`} />
+      <SignOutButton className={`${navLink} hidden lg:inline`} />
       {/* Your profile, or settings until you've picked a username. */}
       <Link
         href={username ? `/u/${username}` : "/settings"}

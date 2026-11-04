@@ -34,6 +34,19 @@ export async function getScoresByUser(fragranceId: number): Promise<Map<string, 
   return new Map(rows.map((r) => [r.userId, scoreFor(r.sentiment as Sentiment, r.index, r.size)]));
 }
 
+// Scores for specific (person, fragrance) pairs, keyed "userId:fragranceId",
+// for showing what each person scored in an activity feed.
+export async function getScoresForPairs(pairs: { userId: string; fragranceId: number }[]) {
+  const wanted = new Set(pairs.map((p) => `${p.userId}:${p.fragranceId}`));
+  const rows = pairs.length ? await positionedRankings([...new Set(pairs.map((p) => p.fragranceId))]) : [];
+  const scores = new Map<string, number>();
+  for (const r of rows) {
+    const key = `${r.userId}:${r.fragranceId}`;
+    if (wanted.has(key)) scores.set(key, scoreFor(r.sentiment as Sentiment, r.index, r.size));
+  }
+  return scores;
+}
+
 export async function getCommunityScores(fragranceIds: number[]): Promise<Map<number, CommunityScore>> {
   const result = new Map<number, CommunityScore>();
   if (fragranceIds.length === 0) return result;
