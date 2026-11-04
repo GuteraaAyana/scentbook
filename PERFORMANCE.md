@@ -52,7 +52,7 @@ With this few rows, Postgres reasonably prefers sequential scans for small table
   - Browse pages show 24 fragrances instead of 48: half the weight (2.0 MB → 1.1 MB), 93.
 - **The detail page had a layout shift of 0.077** on two of three runs: while signed-out visitors' buttons loaded, three placeholders wrapped onto several lines on a phone and then collapsed into one "Sign in" line, pulling everything below up. The row now keeps a fixed minimum height with a single placeholder; CLS is 0.
 
-**What's left: the bottle photos are full size.** Each arrives as Fragella's original 600–750 px `.webp` (typically 40–100 KB) to fill a poster about 130 px wide. A resized copy would be a few KB, which is what would bring browse under 2.5 s. Resizing means our server downloading and keeping resized copies of Fragella's images, which DECISIONS 009 chose not to do because of their terms, so it's left as an open decision. (Lighthouse's simulated slow 4G is a hard test; on a typical phone connection the photos arrive much faster.)
+**What's left: the bottle photos are full size.** Each arrives as Fragella's original 600–750 px `.webp` (typically 40–100 KB) to fill a poster about 130 px wide. A resized copy would be a few KB, which is what would bring browse under 2.5 s. Resizing means our server downloading and keeping resized copies of Fragella's images, which DECISIONS 009 chose not to do because of their terms, so we decided to keep linking them as they are (DECISIONS 009). (Lighthouse's simulated slow 4G is a hard test; on a typical phone connection the photos arrive much faster.)
 
 ### How to re-run
 
