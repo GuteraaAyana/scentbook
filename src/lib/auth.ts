@@ -5,7 +5,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { db } from "@/db";
-import { accounts, sessions, users, verifications } from "@/db/schema";
+import { accounts, rateLimits, sessions, users, verifications } from "@/db/schema";
 
 const github =
   process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET
@@ -27,7 +27,7 @@ export const auth = betterAuth({
   // BETTER_AUTH_SECRET and BETTER_AUTH_URL are read from the environment.
   database: drizzleAdapter(db, {
     provider: "pg",
-    schema: { users, sessions, accounts, verifications },
+    schema: { users, sessions, accounts, verifications, rateLimits },
   }),
   // Our tables are plural; tell Better Auth their names.
   user: {
@@ -37,6 +37,9 @@ export const auth = betterAuth({
       username: { type: "string", required: false, input: false },
       bio: { type: "string", required: false, input: false },
       city: { type: "string", required: false, input: false },
+      // "member" or "admin". Only for showing the Reports link; the moderator
+      // actions read it fresh from the database.
+      role: { type: "string", required: false, input: false },
     },
   },
   session: { modelName: "sessions" },
@@ -50,6 +53,22 @@ export const auth = betterAuth({
   socialProviders: {
     ...(github && { github }),
     ...(google && { google }),
+  },
+
+  // Per IP address, on the /api/auth/* routes. Counts are kept in Postgres
+  // (rate_limits) so they survive restarts and hold across servers. On in
+  // development too, so it can be tried out. Other paths: 100 a minute.
+  rateLimit: {
+    enabled: true,
+    storage: "database",
+    modelName: "rateLimits",
+    window: 60,
+    max: 100,
+    customRules: {
+      "/sign-up/email": { window: 60 * 60, max: 10 }, // new accounts: 10 an hour
+      "/sign-in/email": { window: 5 * 60, max: 10 }, // password guesses: 10 per 5 minutes
+      "/get-session": false, // read on every page; not worth limiting
+    },
   },
   // Lets server actions set the session cookie. Must be the last plugin.
   plugins: [nextCookies()],

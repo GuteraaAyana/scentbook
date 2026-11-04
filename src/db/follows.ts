@@ -1,6 +1,6 @@
 // Reads for following: counts, lists of people, and the activity feed. All
 // per user and changing often, so never cached.
-import { and, count, desc, eq, inArray, isNotNull } from "drizzle-orm";
+import { and, count, desc, eq, inArray, isNotNull, isNull } from "drizzle-orm";
 import { mergeFeed } from "@/lib/feed";
 import { db } from ".";
 import { getScoresForPairs } from "./community";
@@ -97,7 +97,7 @@ export async function getFeed(viewerId: string, limit = 40) {
       .select({ ...who, fragranceId: reviews.fragranceId, at: reviews.createdAt, body: reviews.body })
       .from(reviews)
       .innerJoin(users, eq(users.id, reviews.userId))
-      .where(inArray(reviews.userId, ids))
+      .where(and(inArray(reviews.userId, ids), isNull(reviews.hiddenAt)))
       .orderBy(desc(reviews.createdAt))
       .limit(limit),
     db

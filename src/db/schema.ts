@@ -11,6 +11,7 @@
 
 import { sql } from "drizzle-orm";
 import {
+  bigint,
   boolean,
   check,
   date,
@@ -53,6 +54,12 @@ export const collectionStatusEnum = pgEnum("collection_status", [
 
 // Beli-style ranking: you first say how you felt, then compare within that bucket.
 export const sentimentEnum = pgEnum("sentiment", ["loved", "fine", "disliked"]);
+
+// Admins can see and act on reported reviews (/admin/reports). Granted with
+// `npm run make-admin -- <username>`, never through the app.
+export const userRoleEnum = pgEnum("user_role", ["member", "admin"]);
+
+export const reportReasonEnum = pgEnum("report_reason", ["spam", "offensive", "off_topic", "other"]);
 
 // Where a catalog fragrance came from: hand-curated in src/db/seed/data.ts,
 // or imported from the Fragella API (see DECISIONS.md 007).
@@ -198,6 +205,7 @@ export const users = pgTable("users", {
   username: text("username").unique(),
   bio: text("bio"),
   city: text("city"), // used for the weather-based "wear today" pick
+  role: userRoleEnum("role").notNull().default("member"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -354,6 +362,10 @@ export const reviews = pgTable(
       .notNull()
       .defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }), // set when edited
+    // Set when hidden, by a moderator or automatically after enough reports.
+    // Hidden reviews are left out of every public list and average.
+    hiddenAt: timestamp("hidden_at", { withTimezone: true }),
+    hiddenReason: text("hidden_reason"), // "reports" (automatic) or "moderator"
   },
   (t) => [
     unique().on(t.userId, t.fragranceId), // one review per person per fragrance
@@ -392,3 +404,46 @@ export const wears = pgTable(
     check("compliments_nonnegative", sql`${t.compliments} >= 0`),
   ],
 );
+
+// ---------------------------------------------------------------------------
+// 4. Moderation and abuse limits
+// ---------------------------------------------------------------------------
+
+// One report per person per review. A report stays open until a moderator
+// resolves it ("hidden" or "dismissed").
+export const reviewReports = pgTable(
+  "review_reports",
+  {
+    id: serial("id").primaryKey(),
+    reviewId: integer("review_id")
+      .notNull()
+      .references(() => reviews.id, { onDelete: "cascade" }),
+    reporterId: text("reporter_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    reason: reportReasonEnum("reason").notNull(),
+    details: text("details"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+    resolvedBy: text("resolved_by").references(() => users.id, { onDelete: "set null" }),
+    resolution: text("resolution"), // "hidden" or "dismissed"
+  },
+  (t) => [unique().on(t.reviewId, t.reporterId), index("review_reports_review_idx").on(t.reviewId)],
+)
+
+// Better Auth's rate-limit counters (sign-up, sign-in...), kept in Postgres
+// so limits hold across server restarts and several servers.
+export const rateLimits = pgTable("rate_limits", {
+  id: text("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  count: integer("count").notNull(),
+  lastRequest: bigint("last_request", { mode: "number" }).notNull(),
+});
+
+// Scentbook's own per-person limits on posting (src/lib/rate-limit.ts): one
+// row per person and action, counting within a time window.
+export const actionLimits = pgTable("action_limits", {
+  key: text("key").primaryKey(), // e.g. "review:<user id>"
+  count: integer("count").notNull(),
+  windowStart: timestamp("window_start", { withTimezone: true }).notNull(),
+});

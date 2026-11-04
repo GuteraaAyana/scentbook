@@ -5,18 +5,51 @@ import { Suspense } from "react";
 import { getFragranceReviews, getOwnReview } from "@/db/reviews";
 import { auth } from "@/lib/auth";
 import { LONGEVITY, SILLAGE, averageLabel } from "@/lib/review";
+import { ReportReview } from "./report-review";
 import { ReviewFlow } from "./review-flow";
 
 const dayFormat = new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric" });
 
-// The Reviews section of a fragrance page: averages, everyone's reviews
-// (cached, the same for every visitor), and your own Write/Edit button
-// (per request, inside <Suspense>).
-export async function ReviewsSection({ fragranceId, fragranceName }: { fragranceId: number; fragranceName: string }) {
+// The Reviews section of a fragrance page: averages, everyone's reviews, and
+// your own Write/Edit button.
+//
+// The list is read per request (the data itself is cached, so it's quick)
+// instead of being baked into the page's prerendered shell. When a review is
+// hidden or restored, updateTag expires the cached data at once; a shell
+// containing the list was sometimes served stale for one request afterwards,
+// which could show a hidden review. See DECISIONS.md 017.
+export function ReviewsSection({ fragranceId, fragranceName }: { fragranceId: number; fragranceName: string }) {
+  return (
+    <section aria-labelledby="reviews-heading">
+      <Suspense fallback={<ReviewsSkeleton />}>
+        <Reviews fragranceId={fragranceId} fragranceName={fragranceName} />
+      </Suspense>
+    </section>
+  );
+}
+
+function ReviewsSkeleton() {
+  return (
+    <>
+      <div className="flex min-h-12 items-end border-b border-line pb-2">
+        <h2 id="reviews-heading" className="text-sm font-bold text-muted">
+          Reviews
+        </h2>
+      </div>
+      <div className="mt-5 grid gap-3" aria-hidden="true">
+        <div className="h-4 w-40 animate-pulse rounded bg-surface" />
+        <div className="h-4 w-full max-w-prose animate-pulse rounded bg-surface" />
+      </div>
+    </>
+  );
+}
+
+async function Reviews({ fragranceId, fragranceName }: { fragranceId: number; fragranceName: string }) {
+  await connection();
   const { total, longevity, sillage, reviews } = await getFragranceReviews(fragranceId);
 
   return (
-    <section aria-labelledby="reviews-heading">
+    <>
       <div className="flex min-h-12 flex-wrap items-end justify-between gap-3 border-b border-line pb-2">
         <h2 id="reviews-heading" className="text-sm font-bold text-muted">
           Reviews{total > 0 && ` (${total})`}
@@ -82,11 +115,14 @@ export async function ReviewsSection({ fragranceId, fragranceName }: { fragrance
                 </ul>
               )}
               <p className="mt-2 max-w-prose leading-relaxed whitespace-pre-line">{review.body}</p>
+              <div className="mt-2">
+                <ReportReview reviewId={review.id} authorUsername={review.username} />
+              </div>
             </li>
           ))}
         </ol>
       )}
-    </section>
+    </>
   );
 }
 

@@ -7,7 +7,7 @@ import { primaryButton, secondaryButton } from "@/lib/ui";
 import { ChipChoice } from "./chip-choice";
 import { CountedTextarea } from "./counted-textarea";
 
-type Existing = { body: string; longevity: number | null; sillage: number | null } | null;
+type Existing = { body: string; longevity: number | null; sillage: number | null; hidden: boolean } | null;
 
 const fieldError = "mt-1.5 block text-sm text-danger";
 const ratingOptions = (labels: string[]) => labels.map((label, i) => ({ value: String(i + 1), label }));
@@ -71,6 +71,7 @@ export function ReviewFlow({ fragranceId, fragranceName, existing }: { fragrance
       <button type="button" onClick={open} className={existing ? secondaryButton : primaryButton}>
         {existing ? "Edit your review" : "Write a review"}
       </button>
+      {existing?.hidden && <span className="text-xs text-muted">Hidden by moderation</span>}
 
       <dialog
         ref={dialog}
@@ -80,6 +81,12 @@ export function ReviewFlow({ fragranceId, fragranceName, existing }: { fragrance
         <h2 id="review-title" className="text-2xl font-extrabold tracking-tight">
           {existing ? "Edit your review" : "Review"} of {fragranceName}
         </h2>
+        {existing?.hidden && (
+          <p className="mt-2 text-sm text-muted">
+            Your review is hidden after reports from other members, until a moderator has looked at it. Only you can
+            see it. Editing it won&rsquo;t bring it back on its own.
+          </p>
+        )}
 
         <form key={`${formKey}-${state.attempt}`} action={save} className="mt-6 grid gap-5" noValidate>
           <label className="block">

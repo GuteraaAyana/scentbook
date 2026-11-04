@@ -1,8 +1,9 @@
 // Reads for reviews. The list on a fragrance page is the same for everyone,
 // so it's cached; tags "reviews:<fragrance id>" (that fragrance's reviews
 // changed), "reviews" (any author renamed) and "rankings" (the scores shown
-// next to each review) clear it.
-import { and, avg, count, desc, eq } from "drizzle-orm";
+// next to each review) clear it. Hidden reviews (moderation) are left out of
+// everything public, averages included.
+import { and, avg, count, desc, eq, isNull, sql } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 import { db } from ".";
 import { getScoresByUser } from "./community";
@@ -28,7 +29,7 @@ export async function getFragranceReviews(fragranceId: number) {
       .select({ ...reviewColumns, userId: users.id, name: users.name, username: users.username })
       .from(reviews)
       .innerJoin(users, eq(users.id, reviews.userId))
-      .where(eq(reviews.fragranceId, fragranceId))
+      .where(and(eq(reviews.fragranceId, fragranceId), isNull(reviews.hiddenAt)))
       .orderBy(desc(reviews.createdAt))
       .limit(50),
     db
@@ -39,7 +40,7 @@ export async function getFragranceReviews(fragranceId: number) {
         sillage: avg(reviews.sillage).mapWith(Number),
       })
       .from(reviews)
-      .where(eq(reviews.fragranceId, fragranceId)),
+      .where(and(eq(reviews.fragranceId, fragranceId), isNull(reviews.hiddenAt))),
     getScoresByUser(fragranceId),
   ]);
 
@@ -52,10 +53,11 @@ export async function getFragranceReviews(fragranceId: number) {
   };
 }
 
-// The signed-in user's own review of a fragrance, to edit it.
+// The signed-in user's own review of a fragrance, to edit it. Includes
+// whether it's hidden, so the author can be told; nobody else sees it then.
 export async function getOwnReview(userId: string, fragranceId: number) {
   const [row] = await db
-    .select(reviewColumns)
+    .select({ ...reviewColumns, hidden: sql<boolean>`${reviews.hiddenAt} is not null` })
     .from(reviews)
     .where(and(eq(reviews.userId, userId), eq(reviews.fragranceId, fragranceId)));
   return row ?? null;
@@ -68,7 +70,7 @@ export async function listUserReviews(userId: string, limit = 5) {
     .from(reviews)
     .innerJoin(fragrances, eq(fragrances.id, reviews.fragranceId))
     .innerJoin(brands, eq(brands.id, fragrances.brandId))
-    .where(eq(reviews.userId, userId))
+    .where(and(eq(reviews.userId, userId), isNull(reviews.hiddenAt)))
     .orderBy(desc(reviews.createdAt))
     .limit(limit);
   return toCards(rows);

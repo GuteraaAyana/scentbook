@@ -41,7 +41,11 @@ export function AuthForm({ mode, providers }: Props) {
     setPending(false);
 
     if (error) {
-      setError(error.message ?? "Something went wrong. Please try again.");
+      setError(
+        error.status === 429
+          ? "Too many attempts from here. Wait a few minutes and try again."
+          : (error.message ?? "Something went wrong. Please try again."),
+      );
       return;
     }
     router.push(next);

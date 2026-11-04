@@ -7,6 +7,7 @@ import { headers } from "next/headers";
 import { db } from "@/db";
 import { fragrances, wears } from "@/db/schema";
 import { auth } from "@/lib/auth";
+import { consumeLimit, limitMessage } from "@/lib/rate-limit";
 import { type WearErrors, type WearInput, validateWear } from "@/lib/wear";
 
 // `values` and `attempt` come back with errors: React resets a form after its
@@ -54,6 +55,9 @@ export async function logWear(fragranceId: number, previous: WearFormState, form
 
   const [exists] = await db.select({ id: fragrances.id }).from(fragrances).where(eq(fragrances.id, fragranceId));
   if (!exists) return failed({ message: "Unknown fragrance." });
+
+  const limit = await consumeLimit("wear", userId);
+  if (!limit.allowed) return failed({ message: limitMessage(limit.retryAfterSeconds) });
 
   await db.insert(wears).values({ userId, fragranceId, ...result.value });
   refresh();

@@ -53,7 +53,7 @@ async function UserMenu() {
     );
   }
 
-  const { name, username } = session.user;
+  const { name, username, role } = session.user;
   return (
     <>
       <Link href="/feed" className={`${navLink} hidden sm:inline`}>
@@ -68,6 +68,11 @@ async function UserMenu() {
       <Link href="/rankings" className={`${navLink} hidden md:inline`}>
         Rankings
       </Link>
+      {role === "admin" && (
+        <Link href="/admin/reports" className={`${navLink} hidden lg:inline`}>
+          Reports
+        </Link>
+      )}
       <SignOutButton className={`${navLink} hidden lg:inline`} />
       {/* Your profile, or settings until you've picked a username. */}
       <Link

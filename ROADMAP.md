@@ -22,20 +22,20 @@ What's done, what's next, and what's planned for later. The reasoning behind eac
 - [x] Following: follow/unfollow, follower lists, /feed of rankings, wears, reviews and collection changes, /people (DECISIONS 015)
 - [x] What to wear today: a weather-based pick from your shelf on the home page (DECISIONS 016)
 - [x] Lighthouse after the redesign: fixed browse image loading and a layout shift on fragrance pages (PERFORMANCE.md); kept bottle photos unresized (DECISIONS 009)
+- [x] Moderation: report reviews, auto-hide at 3 reports, /admin/reports, `npm run make-admin`; rate limits on posting, sign-up and sign-in (DECISIONS 017)
 
 ## Now
 - [ ] Add GitHub and Google OAuth keys to `.env.local` (see README)
 
 ## Next
-- [ ] Report and hide abusive reviews; rate limiting on sign-up and posting (needed before going public)
-- [ ] Deploy: production database, hosting and a real domain (README lists the planned AWS setup)
+- [ ] Deploy: production database, hosting and a real domain (README lists the planned AWS setup). Make sure the host sets `x-forwarded-for`, which the sign-in limits rely on (DECISIONS 017)
 
 ## Later
 - [ ] Learn from your diary which fragrances you wear in which weather; prefill the weather when logging a wear
 - [ ] Notifications (new followers) and paging through older feed items
 - [ ] Edit a diary entry (for now: delete and log it again)
 - [ ] **User fragrance submissions with admin review.** Signed-in users submit a missing fragrance; it waits in a queue until an admin approves it, so nothing unverified reaches the catalog.
-  - Depends on login, plus an admin role on `users`.
+  - Depends on login, plus the admin role on `users` (added with moderation).
   - A `fragrance_submissions` table: the proposed fragrance as JSON, `status` (pending / approved / rejected), submitter, reviewer, reason for rejecting.
   - The submission form picks brands, notes and accords from the existing catalog (with "suggest a new one" as a fallback), so near-duplicates like "Bourbon Vanilla" vs "Vanilla" don't creep in.
   - Approving reuses the seed script's insert logic, so a fragrance enters the catalog the same way whether it came from `data.ts` or a user.

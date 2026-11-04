@@ -7,6 +7,7 @@ import { headers } from "next/headers";
 import { db } from "@/db";
 import { fragrances, reviews } from "@/db/schema";
 import { auth } from "@/lib/auth";
+import { consumeLimit, limitMessage } from "@/lib/rate-limit";
 import { type ReviewErrors, type ReviewInput, validateReview } from "@/lib/review";
 
 // `values` and `attempt` come back with errors: React resets a form after its
@@ -51,11 +52,15 @@ export async function saveReview(fragranceId: number, previous: ReviewFormState,
   const [exists] = await db.select({ id: fragrances.id }).from(fragrances).where(eq(fragrances.id, fragranceId));
   if (!exists) return failed({ message: "Unknown fragrance." });
 
+  const limit = await consumeLimit("review", userId);
+  if (!limit.allowed) return failed({ message: limitMessage(limit.retryAfterSeconds) });
+
   await db
     .insert(reviews)
     .values({ userId, fragranceId, ...result.value })
     .onConflictDoUpdate({
       target: [reviews.userId, reviews.fragranceId],
+      // A hidden review stays hidden when edited; a moderator decides.
       set: { ...result.value, updatedAt: new Date() },
     });
 

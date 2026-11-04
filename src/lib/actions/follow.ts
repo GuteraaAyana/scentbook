@@ -7,6 +7,7 @@ import { headers } from "next/headers";
 import { db } from "@/db";
 import { follows, users } from "@/db/schema";
 import { auth } from "@/lib/auth";
+import { consumeLimit, limitMessage } from "@/lib/rate-limit";
 
 async function resolve(username: string) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -27,6 +28,9 @@ export async function setFollowing(username: string, follow: boolean) {
   if ("error" in who) return { error: who.error };
 
   if (follow) {
+    // Only following is limited; unfollowing is always allowed.
+    const limit = await consumeLimit("follow", who.followerId);
+    if (!limit.allowed) return { error: limitMessage(limit.retryAfterSeconds) };
     await db.insert(follows).values(who).onConflictDoNothing();
   } else {
     await db
