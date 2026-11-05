@@ -56,7 +56,7 @@ echo "Running tests…"; npm test --silent >/dev/null
 
 # The server is ARM (t4g), like Apple-silicon Macs, so this builds natively.
 # The build reads the production database to prerender pages.
-echo "Building $REV…"
+echo "Building ${REV}…"
 docker buildx build --platform linux/arm64 --load -t "$REPO:$REV" \
   --secret id=database_url,env=DATABASE_URL \
   --secret id=better_auth_secret,env=BETTER_AUTH_SECRET .
@@ -65,6 +65,6 @@ echo "Pushing…"
 aws ecr get-login-password --region "$REGION" | docker login --username AWS --password-stdin "$REGISTRY" >/dev/null
 docker push -q "$REPO:$REV"
 
-echo "Deploying on $INSTANCE…"
+echo "Deploying on ${INSTANCE}…"
 run_on_server "$REPO:$REV"
 echo "Live at $BETTER_AUTH_URL"
