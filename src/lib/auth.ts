@@ -55,6 +55,14 @@ export const auth = betterAuth({
     ...(google && { google }),
   },
 
+  // In production the app sits behind a load balancer, which adds the
+  // client's address to x-forwarded-for. Hops in these private ranges are
+  // that infrastructure, so the limiter takes the address just before them,
+  // the real client, and ignores anything a client wrote into the header.
+  advanced: {
+    ipAddress: { trustedProxies: ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"] },
+  },
+
   // Per IP address, on the /api/auth/* routes. Counts are kept in Postgres
   // (rate_limits) so they survive restarts and hold across servers. On in
   // development too, so it can be tried out. Other paths: 100 a minute.

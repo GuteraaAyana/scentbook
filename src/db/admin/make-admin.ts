@@ -8,7 +8,8 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import * as schema from "../schema";
 
-config({ path: ".env.local" });
+// ENV_FILE=.env.production points this at production (see DEPLOY.md).
+config({ path: process.env.ENV_FILE ?? ".env.local" });
 
 async function main() {
   const [username, flag] = process.argv.slice(2);

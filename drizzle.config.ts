@@ -3,7 +3,8 @@
 import { config } from "dotenv";
 import { defineConfig } from "drizzle-kit";
 
-config({ path: ".env.local" });
+// ENV_FILE=.env.production points this at production (see DEPLOY.md).
+config({ path: process.env.ENV_FILE ?? ".env.local" });
 
 export default defineConfig({
   schema: "./src/db/schema.ts",

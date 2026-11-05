@@ -162,3 +162,22 @@ This replaces the look in 009 (the dark boutique). The Fragella bottle images an
 - **The review list streams per request now.** It used to be part of the fragrance page's prerendered shell. In testing, the first visit after a review was restored got the build-time copy of the page; hiding happened to be fine, but the same thing could show a hidden review once. The list's data is still cached and tagged, so it costs one fast cache read per visit and is always current.
 - **Considered:** hiding on the first report (too easy to abuse); a word filter (easy to get around, and blocks innocent words); per-IP limits on posting (shared Wi-Fi would punish everyone on it).
 - **Not yet:** telling the author when their review is hidden or restored, reporting profiles, and an audit log of moderator actions beyond the resolved reports.
+
+## 018. Hosting: AWS Lightsail containers + RDS
+**Date:** 2026-11-05
+
+- **Picked:** the app runs as one Docker container (`next start` from Next's standalone build) on an **AWS Lightsail container service** (Micro, ~$10 a month), with the database on **Amazon RDS for PostgreSQL** (db.t4g.micro). Lightsail gives a free HTTPS address, a load balancer, health checks and logs. Deploys are `scripts/deploy.sh`; the runbook, costs and rollback plan are in [DEPLOY.md](DEPLOY.md).
+- **Considered:**
+  - **AWS Amplify** (the original plan): least setup, but there's no AWS statement that it supports Next 16's `"use cache"`, and a May 2026 report says cache refreshes don't work there. Scentbook depends on them (a hidden review must disappear at once), so it's too risky.
+  - **ECS Fargate:** the standard AWS container service, but it needs a load balancer (~$16 a month on its own) and can't serve HTTPS without our own domain.
+  - **Vercel + Neon:** the easiest and fully compatible, but not AWS, which is part of the point of the project.
+- **Running exactly what was tested:** the container runs the same `next start` server used for every local test, so caching, streaming and `updateTag` behave as they did here.
+- **One container on purpose:** cached pages live in the server's memory. A second container wouldn't hear about the first one's cache refreshes, so it could keep showing a review that was just hidden. Scaling out first needs a shared cache handler (for example Redis).
+- **Security before launch** (from the pre-launch checklist):
+  - Security headers on every page: a Content-Security-Policy (scripts only from this site, images only from here and Fragella's CDN, no framing), HSTS, nosniff, a strict Referrer-Policy, and no `X-Powered-By`. The CSP allows inline scripts because prerendered pages are built before any request exists, so they can't carry a per-request nonce; Next's docs recommend this form for static pages.
+  - Sign-in limits trust only private-range proxies in `x-forwarded-for`, so they see the real client and ignore anything a client writes into the header.
+  - The database connection is TLS with the certificate verified against Amazon's RDS certificate authorities, which are bundled into the image.
+  - Secrets reach the image build as BuildKit secrets, so they're never stored in its layers. At runtime they live in Lightsail's settings, not in git.
+- **The database is reachable from the internet** (TLS and a long random password only), because Lightsail containers have no fixed outbound address to allow. A private connection would need ECS in the same VPC (and the load balancer cost above). Revisit if Scentbook grows.
+- **Also added:** `/api/health` (checks the database; Lightsail uses it to decide when a new version can take traffic) and an error page that shows a reference people can quote.
+- **Not yet:** a domain of our own; error tracking beyond the logs (for example Sentry); CloudWatch alarms beyond Lightsail's.

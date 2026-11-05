@@ -8,7 +8,7 @@
 
 - **App:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS
 - **Database:** PostgreSQL + Drizzle ORM (pgvector for similarity search, coming soon)
-- **Cloud (coming soon):** AWS RDS, S3, Lambda, CloudFront, Bedrock, Amplify, defined in AWS CDK
+- **Hosting:** AWS Lightsail container service + Amazon RDS for PostgreSQL. See [DEPLOY.md](DEPLOY.md)
 
 ## Data model
 

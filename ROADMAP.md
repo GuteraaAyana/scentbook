@@ -28,7 +28,8 @@ What's done, what's next, and what's planned for later. The reasoning behind eac
 - [ ] Add GitHub and Google OAuth keys to `.env.local` (see README)
 
 ## Next
-- [ ] Deploy: production database, hosting and a real domain (README lists the planned AWS setup). Make sure the host sets `x-forwarded-for`, which the sign-in limits rely on (DECISIONS 017)
+- [ ] Deploy to AWS Lightsail + RDS ([DEPLOY.md](DEPLOY.md), DECISIONS 018). Done: pre-launch checks, security headers, health check, Docker image, deploy and rollback script. Left: create the database and service, first deploy, verify live
+- [ ] A domain of our own (then update the OAuth callback URLs)
 
 ## Later
 - [ ] Learn from your diary which fragrances you wear in which weather; prefill the weather when logging a wear

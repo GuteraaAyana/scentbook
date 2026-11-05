@@ -15,7 +15,8 @@ import { accords, brands, fragrances, notes } from "./data";
 import { refreshRunningServer } from "./refresh";
 import { upsertCatalog } from "./upsert";
 
-config({ path: ".env.local" });
+// ENV_FILE=.env.production points this at production (see DEPLOY.md).
+config({ path: process.env.ENV_FILE ?? ".env.local" });
 
 // Catch typos (a note or accord that isn't in the catalog) before touching the DB.
 function validate() {

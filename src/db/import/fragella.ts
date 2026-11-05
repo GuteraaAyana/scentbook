@@ -23,7 +23,8 @@ import { accords as curatedAccords, fragrances as curatedFragrances } from "../s
 import { refreshRunningServer } from "../seed/refresh";
 import { type CatalogFragrance, slugify, upsertCatalog } from "../seed/upsert";
 
-config({ path: ".env.local" });
+// ENV_FILE=.env.production points this at production (see DEPLOY.md).
+config({ path: process.env.ENV_FILE ?? ".env.local" });
 
 const API = "https://api.fragella.com/api/v1";
 const CACHE_DIR = process.env.FRAGELLA_CACHE_DIR ?? ".fragella";
