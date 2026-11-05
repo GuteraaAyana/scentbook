@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { listWears } from "@/db/wears";
+import { type TemperatureUnit, formatTemperature } from "@/lib/temperature";
 import { DeleteWearButton } from "./delete-wear-button";
 import { Poster } from "./poster";
 
@@ -9,13 +10,25 @@ const weekday = new Intl.DateTimeFormat("en", { weekday: "short", timeZone: "UTC
 const shortDate = new Intl.DateTimeFormat("en", { month: "short", day: "numeric", timeZone: "UTC" });
 
 // One diary entry: the day, the fragrance, and the details you logged.
-// `editable` adds the delete button and the note (your own diary only):
-// notes can be personal, so public profiles never show them.
-export function WearEntry({ entry, editable = false, showMonth = false }: { entry: Entry; editable?: boolean; showMonth?: boolean }) {
+// `editable` adds the delete button, the note and the place (your own diary
+// only): those can be personal, so public profiles never show them.
+// Temperatures show in the reader's unit.
+export function WearEntry({
+  entry,
+  unit = "c",
+  editable = false,
+  showMonth = false,
+}: {
+  entry: Entry;
+  unit?: TemperatureUnit;
+  editable?: boolean;
+  showMonth?: boolean;
+}) {
   const date = new Date(`${entry.wornOn}T00:00:00Z`);
   const details = [
     entry.occasion,
-    [entry.weather, entry.temperatureC != null ? `${entry.temperatureC}°C` : null].filter(Boolean).join(", "),
+    editable && entry.place ? entry.place.split(",")[0] : null,
+    [entry.weather, entry.temperatureC != null ? formatTemperature(entry.temperatureC, unit) : null].filter(Boolean).join(", "),
     entry.compliments > 0 ? `${entry.compliments} ${entry.compliments === 1 ? "compliment" : "compliments"}` : null,
   ].filter(Boolean);
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { getWearSummary } from "@/db/wears";
 import { auth } from "@/lib/auth";
+import { isUnit } from "@/lib/temperature";
 import { LogWearFlow } from "./log-wear-flow";
 
 const dayFormat = new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
@@ -16,10 +17,20 @@ export async function WearControl({ fragranceId, fragranceName }: { fragranceId:
   if (!session) return null;
 
   const { times, last } = await getWearSummary(session.user.id, fragranceId);
+  const user = session.user;
 
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-      <LogWearFlow fragranceId={fragranceId} fragranceName={fragranceName} />
+      <LogWearFlow
+        fragranceId={fragranceId}
+        fragranceName={fragranceName}
+        home={
+          user.city && user.cityLatitude != null && user.cityLongitude != null
+            ? { label: user.city, latitude: user.cityLatitude, longitude: user.cityLongitude }
+            : null
+        }
+        unit={isUnit(user.temperatureUnit) ? user.temperatureUnit : "c"}
+      />
       {times > 0 && last && (
         <Link href="/diary" className="text-sm text-muted hover:text-foreground">
           Worn {times === 1 ? "once" : `${times} times`}, last on {dayFormat.format(new Date(`${last}T00:00:00Z`))}

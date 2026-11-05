@@ -5,6 +5,7 @@ import { listCollection } from "@/db/collections";
 import { listRankings } from "@/db/rankings";
 import { listWears } from "@/db/wears";
 import { auth } from "@/lib/auth";
+import { formatTemperature, isUnit } from "@/lib/temperature";
 import { primaryButton, rowHeading } from "@/lib/ui";
 import { conditionFor, pickForToday } from "@/lib/wear-today";
 import { currentWeather, findCity } from "@/lib/weather";
@@ -32,7 +33,13 @@ export async function TodayPick() {
   } else if (shelf.length === 0) {
     body = <Prompt text="Mark the fragrances you own as Have it, and you'll get a pick for today's weather." href="/fragrances" action="Browse fragrances" />;
   } else {
-    const place = await findCity(city);
+    // A city chosen from the place list has its coordinates saved; an older
+    // typed one is looked up by name.
+    const { cityLatitude: latitude, cityLongitude: longitude } = session.user;
+    const place =
+      latitude != null && longitude != null
+        ? { name: city.split(",")[0], latitude, longitude }
+        : await findCity(city);
     const weather = place ? await currentWeather(place.latitude, place.longitude) : null;
 
     if (!place || !weather) {
@@ -66,7 +73,8 @@ export async function TodayPick() {
       body = (
         <>
           <p className="text-muted">
-            {weather.temperatureC}°C and {conditionFor(weather).toLowerCase()} in {place.name}.
+            {formatTemperature(weather.temperatureC, isUnit(session.user.temperatureUnit) ? session.user.temperatureUnit : "c")}{" "}
+            and {conditionFor(weather).toLowerCase()} in {place.name}.
           </p>
           <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             <Link href={`/fragrances/${best.slug}`} className="group grid grid-cols-[6rem_minmax(0,1fr)] gap-4">

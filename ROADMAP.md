@@ -25,6 +25,7 @@ What's done, what's next, and what's planned for later. The reasoning behind eac
 - [x] Moderation: report reviews, auto-hide at 3 reports, /admin/reports, `npm run make-admin`; rate limits on posting, sign-up and sign-in (DECISIONS 017)
 - [x] Live at https://scentbook.online: AWS EC2 + RDS, HTTPS by Caddy, deploy and rollback scripts, pre-launch security fixes ([DEPLOY.md](DEPLOY.md), DECISIONS 018)
 - [x] Usernames chosen at sign-up, changeable once a week; moderators add fragrances at /admin/fragrances/new, matched to the existing catalog (DECISIONS 019)
+- [x] Search as you type (fragrances, people); cities from the weather service; weather filled in on wears; °C/°F; profile setup after sign-up; a Scentbook icon (DECISIONS 020)
 
 ## Now
 - [ ] GitHub and Google sign-in: OAuth apps with `https://scentbook.online/api/auth/callback/...`, keys in `.env.production`, then `scripts/push-settings.sh` and deploy
@@ -33,7 +34,7 @@ What's done, what's next, and what's planned for later. The reasoning behind eac
 
 ## Later
 - [ ] Edit or delete a fragrance from the admin pages
-- [ ] Learn from your diary which fragrances you wear in which weather; prefill the weather when logging a wear
+- [ ] Learn from your diary which fragrances you wear in which weather
 - [ ] Notifications (new followers) and paging through older feed items
 - [ ] Edit a diary entry (for now: delete and log it again)
 - [ ] **User fragrance submissions with admin review.** Signed-in users submit a missing fragrance; it waits in a queue until an admin approves it, so nothing unverified reaches the catalog.

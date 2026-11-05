@@ -59,14 +59,20 @@ export function AuthForm({ mode, providers }: Props) {
       );
       return;
     }
-    router.push(next);
+    // A new account goes to profile setup first, then on to where it was headed.
+    router.push(signUp ? `/settings?welcome=1&next=${encodeURIComponent(next)}` : next);
     router.refresh(); // re-render server components (the header) with the new session
   }
 
   async function social(provider: "github" | "google") {
     setError(null);
     // Leaves the site for GitHub/Google, which send the user back to callbackURL.
-    const { error } = await authClient.signIn.social({ provider, callbackURL: next });
+    const { error } = await authClient.signIn.social({
+      provider,
+      callbackURL: next,
+      // A first sign-in creates the account: set up the profile first.
+      newUserCallbackURL: `/settings?welcome=1&next=${encodeURIComponent(next)}`,
+    });
     if (error) setError(error.message ?? "Couldn't reach the sign-in provider.");
   }
 

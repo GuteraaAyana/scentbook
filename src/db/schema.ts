@@ -59,6 +59,9 @@ export const sentimentEnum = pgEnum("sentiment", ["loved", "fine", "disliked"]);
 // `npm run make-admin -- <username>`, never through the app.
 export const userRoleEnum = pgEnum("user_role", ["member", "admin"]);
 
+// How someone reads temperatures. Stored values are always °C.
+export const temperatureUnitEnum = pgEnum("temperature_unit", ["c", "f"]);
+
 export const reportReasonEnum = pgEnum("report_reason", ["spam", "offensive", "off_topic", "other"]);
 
 // Where a catalog fragrance came from: hand-curated in src/db/seed/data.ts,
@@ -209,7 +212,14 @@ export const users = pgTable("users", {
   // When the username was last set; it can change once every 7 days.
   usernameChangedAt: timestamp("username_changed_at", { withTimezone: true }),
   bio: text("bio"),
-  city: text("city"), // used for the weather-based "wear today" pick
+  city: text("city"), // "Lisbon, Portugal": the label of the place below
+  // The home city, chosen from Open-Meteo's place list so the weather
+  // service knows it: its place id, coordinates and time zone.
+  cityPlaceId: integer("city_place_id"),
+  cityLatitude: doublePrecision("city_latitude"),
+  cityLongitude: doublePrecision("city_longitude"),
+  cityTimezone: text("city_timezone"),
+  temperatureUnit: temperatureUnitEnum("temperature_unit").notNull().default("c"),
   role: userRoleEnum("role").notNull().default("member"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
@@ -395,6 +405,10 @@ export const wears = pgTable(
     occasion: text("occasion"), // work, date night, gym...
     temperatureC: smallint("temperature_c"),
     weather: text("weather"), // sunny, rainy...
+    // Where it was worn: home by default, or another place from Open-Meteo.
+    place: text("place"),
+    placeLatitude: doublePrecision("place_latitude"),
+    placeLongitude: doublePrecision("place_longitude"),
     compliments: smallint("compliments").notNull().default(0),
     note: text("note"),
     createdAt: timestamp("created_at", { withTimezone: true })

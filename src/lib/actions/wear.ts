@@ -5,7 +5,7 @@ import { and, eq } from "drizzle-orm";
 import { refresh } from "next/cache";
 import { headers } from "next/headers";
 import { db } from "@/db";
-import { fragrances, wears } from "@/db/schema";
+import { fragrances, users, wears } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { consumeLimit, limitMessage } from "@/lib/rate-limit";
 import { type WearErrors, type WearInput, validateWear } from "@/lib/wear";
@@ -34,7 +34,11 @@ export async function logWear(fragranceId: number, previous: WearFormState, form
     wornOn: String(form.get("wornOn") ?? ""),
     occasion: String(form.get("occasion") ?? ""),
     weather: String(form.get("weather") ?? ""),
-    temperatureC: String(form.get("temperatureC") ?? ""),
+    temperature: String(form.get("temperature") ?? ""),
+    unit: String(form.get("unit") ?? "c"),
+    place: String(form.get("place") ?? ""),
+    placeLatitude: String(form.get("placeLatitude") ?? ""),
+    placeLongitude: String(form.get("placeLongitude") ?? ""),
     compliments: String(form.get("compliments") ?? ""),
     note: String(form.get("note") ?? ""),
   };
@@ -59,7 +63,10 @@ export async function logWear(fragranceId: number, previous: WearFormState, form
   const limit = await consumeLimit("wear", userId);
   if (!limit.allowed) return failed({ message: limitMessage(limit.retryAfterSeconds) });
 
-  await db.insert(wears).values({ userId, fragranceId, ...result.value });
+  const { unit, ...entry } = result.value;
+  await db.insert(wears).values({ userId, fragranceId, ...entry });
+  // Remember the unit they typed in, for next time and everywhere else.
+  await db.update(users).set({ temperatureUnit: unit }).where(eq(users.id, userId));
   refresh();
   return { errors: {}, message: null, saved: previous.saved + 1, values: null, attempt: previous.attempt + 1 };
 }

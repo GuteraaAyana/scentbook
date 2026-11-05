@@ -43,6 +43,11 @@ export const auth = betterAuth({
       usernameChangedAt: { type: "date", required: false, input: false },
       bio: { type: "string", required: false, input: false },
       city: { type: "string", required: false, input: false },
+      // The home city's place (chosen from the weather service's list) and
+      // the reader's temperature unit, so pages can use them from the session.
+      cityLatitude: { type: "number", required: false, input: false },
+      cityLongitude: { type: "number", required: false, input: false },
+      temperatureUnit: { type: "string", required: false, input: false },
       // "member" or "admin". Only for showing the Reports link; the moderator
       // actions read it fresh from the database.
       role: { type: "string", required: false, input: false },

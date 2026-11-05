@@ -1,6 +1,8 @@
 // Rules for a wear diary entry, shared by the form and the server action and
 // kept pure so they can be tested (wear.test.ts).
 
+import { type TemperatureUnit, isUnit, toCelsius, toUnit } from "./temperature";
+
 export const OCCASIONS = ["Everyday", "Work", "Date night", "Going out", "Special occasion", "Travel", "At home"];
 export const WEATHER = ["Sunny", "Cloudy", "Rainy", "Snowy", "Windy", "Humid"];
 export const NOTE_MAX = 280;
@@ -10,7 +12,11 @@ export type WearInput = {
   wornOn: string;
   occasion: string;
   weather: string;
-  temperatureC: string;
+  temperature: string; // in `unit`
+  unit: string; // "c" or "f"
+  place: string; // "Lisbon, Portugal", or "" for none
+  placeLatitude: string;
+  placeLongitude: string;
   compliments: string;
   note: string;
 };
@@ -18,10 +24,15 @@ export type WearValues = {
   wornOn: string; // YYYY-MM-DD
   occasion: string | null;
   weather: string | null;
-  temperatureC: number | null;
+  temperatureC: number | null; // always stored in °C
+  unit: TemperatureUnit;
+  place: string | null;
+  placeLatitude: number | null;
+  placeLongitude: number | null;
   compliments: number;
   note: string | null;
 };
+const PLACE_MAX = 120;
 export type WearErrors = Partial<Record<keyof WearInput, string>>;
 
 // A real calendar date in YYYY-MM-DD form ("2026-02-30" isn't).
@@ -57,11 +68,31 @@ export function validateWear(input: WearInput, today: string): { ok: true; value
   if (occasion.length > OCCASION_MAX) errors.occasion = `Keep it to ${OCCASION_MAX} characters.`;
   if (weather && !WEATHER.includes(weather)) errors.weather = "Pick one of the weather options.";
 
+  const unit: TemperatureUnit = isUnit(input.unit) ? input.unit : "c";
   let temperatureC: number | null = null;
-  if (input.temperatureC.trim()) {
-    temperatureC = wholeNumber(input.temperatureC);
+  if (input.temperature.trim()) {
+    const typed = wholeNumber(input.temperature);
+    temperatureC = Number.isInteger(typed) ? toCelsius(typed, unit) : NaN;
     if (!Number.isInteger(temperatureC) || temperatureC < -50 || temperatureC > 60) {
-      errors.temperatureC = "Use a whole number of degrees between -50 and 60.";
+      errors.temperature = `Use a whole number of degrees between ${toUnit(-50, unit)} and ${toUnit(60, unit)}.`;
+    }
+  }
+
+  // Where it was worn: a place picked from the weather service's list, so its
+  // label comes with coordinates. None at all is fine too.
+  const place = input.place.trim();
+  let placeLatitude: number | null = null;
+  let placeLongitude: number | null = null;
+  if (place) {
+    placeLatitude = Number(input.placeLatitude);
+    placeLongitude = Number(input.placeLongitude);
+    if (
+      place.length > PLACE_MAX ||
+      !input.placeLatitude.trim() || !input.placeLongitude.trim() ||
+      !Number.isFinite(placeLatitude) || Math.abs(placeLatitude) > 90 ||
+      !Number.isFinite(placeLongitude) || Math.abs(placeLongitude) > 180
+    ) {
+      errors.place = "Choose the city from the list.";
     }
   }
 
@@ -78,7 +109,18 @@ export function validateWear(input: WearInput, today: string): { ok: true; value
   if (Object.keys(errors).length > 0) return { ok: false, errors };
   return {
     ok: true,
-    value: { wornOn, occasion: occasion || null, weather: weather || null, temperatureC, compliments, note: note || null },
+    value: {
+      wornOn,
+      occasion: occasion || null,
+      weather: weather || null,
+      temperatureC,
+      unit,
+      place: place || null,
+      placeLatitude,
+      placeLongitude,
+      compliments,
+      note: note || null,
+    },
   };
 }
 
@@ -94,4 +136,13 @@ export function groupByMonth<T extends { wornOn: string }>(entries: T[]) {
     else groups.push({ label, items: [entry] });
   }
   return groups;
+}
+
+// Open-Meteo's weather code (WMO) for a day → one of the WEATHER options.
+// Strong wind wins over clear or cloudy skies, since it's what you'd notice.
+export function weatherFromCode(code: number, maxWindKph: number | null = null): (typeof WEATHER)[number] {
+  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return "Snowy";
+  if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82) || code >= 95) return "Rainy";
+  if (maxWindKph !== null && maxWindKph >= 40) return "Windy";
+  return code <= 1 ? "Sunny" : "Cloudy";
 }

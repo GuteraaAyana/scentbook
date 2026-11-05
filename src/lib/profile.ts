@@ -39,11 +39,12 @@ export function usernameChange(
   return availableAt ? { allowed: false, availableAt } : { allowed: true, changed: true };
 }
 export const BIO_MAX = 160;
-export const CITY_MAX = 60;
 
-export type ProfileInput = { username: string; bio: string; city: string };
-export type ProfileValues = { username: string; bio: string | null; city: string | null };
-export type ProfileErrors = Partial<Record<keyof ProfileInput, string>>;
+// The home city isn't typed: it's chosen from the weather service's place
+// list and checked by looking it up (src/lib/actions/profile.ts).
+export type ProfileInput = { username: string; bio: string };
+export type ProfileValues = { username: string; bio: string | null };
+export type ProfileErrors = Partial<Record<keyof ProfileInput | "city" | "temperatureUnit", string>>;
 
 export function validateProfile(
   input: ProfileInput,
@@ -51,13 +52,11 @@ export function validateProfile(
   const checked = validateUsername(input.username);
   const username = checked.ok ? checked.value : "";
   const bio = input.bio.trim();
-  const city = input.city.trim();
   const errors: ProfileErrors = {};
 
   if (!checked.ok) errors.username = checked.error;
   if (bio.length > BIO_MAX) errors.bio = `Keep it to ${BIO_MAX} characters (it's ${bio.length}).`;
-  if (city.length > CITY_MAX) errors.city = `Keep it to ${CITY_MAX} characters.`;
 
   if (Object.keys(errors).length > 0) return { ok: false, errors };
-  return { ok: true, value: { username, bio: bio || null, city: city || null } };
+  return { ok: true, value: { username, bio: bio || null } };
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { PersonList } from "@/components/people";
+import { PeopleSearch } from "@/components/people-search";
 import { listPeople } from "@/db/follows";
 import { pageContainer } from "@/lib/ui";
 
@@ -22,10 +22,6 @@ export default function PeoplePage() {
 
 async function People() {
   await connection();
-  const people = await listPeople();
-  return (
-    <div className="mt-4 max-w-2xl">
-      <PersonList people={people} empty="Nobody has a public profile yet." />
-    </div>
-  );
+  const people = await listPeople(500);
+  return <PeopleSearch people={people} />;
 }

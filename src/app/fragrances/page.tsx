@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { FragranceGrid, FragranceGridSkeleton } from "@/components/fragrance-card";
+import { FragranceSearch } from "@/components/fragrance-search";
 import { listFragrances, PAGE_SIZE } from "@/db/fragrances";
 import { pageContainer, secondaryButton } from "@/lib/ui";
 
@@ -31,8 +32,10 @@ export default function FragrancesPage(props: PageProps<"/fragrances">) {
 }
 
 async function CatalogPage({ searchParams }: Pick<PageProps<"/fragrances">, "searchParams">) {
-  const raw = (await searchParams).page;
+  const params = await searchParams;
+  const raw = params.page;
   const page = Number(typeof raw === "string" ? raw : "1");
+  const query = typeof params.q === "string" ? params.q : "";
   if (!Number.isInteger(page) || page < 1) notFound();
 
   const { fragrances, total, pageCount } = await listFragrances(page);
@@ -50,8 +53,8 @@ async function CatalogPage({ searchParams }: Pick<PageProps<"/fragrances">, "sea
   const last = first + fragrances.length - 1;
 
   return (
-    <>
-      <p className="mt-3 text-muted">
+    <FragranceSearch initialQuery={query}>
+      <p className="mt-6 text-sm text-muted">
         {pageCount > 1 ? `Showing ${first} to ${last} of ${total}` : `${total} fragrances`}, sorted by brand
       </p>
 
@@ -80,6 +83,6 @@ async function CatalogPage({ searchParams }: Pick<PageProps<"/fragrances">, "sea
           )}
         </nav>
       )}
-    </>
+    </FragranceSearch>
   );
 }

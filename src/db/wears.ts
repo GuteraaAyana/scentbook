@@ -11,6 +11,7 @@ const entryColumns = {
   occasion: wears.occasion,
   weather: wears.weather,
   temperatureC: wears.temperatureC,
+  place: wears.place, // private: only the diary shows it
   compliments: wears.compliments,
   note: wears.note,
 };

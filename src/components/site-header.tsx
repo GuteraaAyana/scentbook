@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { auth } from "@/lib/auth";
 import { pageContainer } from "@/lib/ui";
+import { LogoMark } from "./logo-mark";
 import { SignOutButton } from "./sign-out-button";
 
 const navLink = "font-bold text-muted transition-colors hover:text-foreground";
@@ -14,11 +15,15 @@ export function SiteHeader() {
   return (
     <header className="bg-chrome">
       <nav className={`${pageContainer} flex h-14 items-center gap-5 text-sm whitespace-nowrap sm:gap-7`}>
-        <Link href="/" className="text-xl font-extrabold tracking-tight">
+        <Link href="/" className="flex items-center gap-2 text-xl font-extrabold tracking-tight">
+          <LogoMark className="size-7 shrink-0" />
           scentbook
         </Link>
         <Link href="/fragrances" className={navLink}>
           Fragrances
+        </Link>
+        <Link href="/people" className={`${navLink} hidden sm:inline`}>
+          People
         </Link>
         <div className="ml-auto flex items-center gap-4 sm:gap-6">
           <Suspense fallback={<span className="h-8 w-20" />}>

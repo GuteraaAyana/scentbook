@@ -29,9 +29,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteHeader />
         {children}
         <footer className="mt-auto bg-chrome">
-          <div className={`${pageContainer} flex flex-wrap justify-between gap-4 py-8 text-sm text-muted`}>
-            <p>Fragrance data and bottle images from the Fragella API, plus entries curated by hand.</p>
-            <Link href="/people" className="font-bold hover:text-foreground">
+          <div className={`${pageContainer} flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3 text-xs text-muted`}>
+            <p>Catalog data and photos: Fragella</p>
+            <Link href="/people" className="hover:text-foreground">
               People
             </Link>
           </div>

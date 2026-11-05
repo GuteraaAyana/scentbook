@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { FragranceGrid, FragranceGridSkeleton } from "@/components/fragrance-card";
-import { SignOutButton } from "@/components/sign-out-button";
 import { listCollection } from "@/db/collections";
 import { auth } from "@/lib/auth";
 import { pageContainer, primaryButton } from "@/lib/ui";
@@ -43,28 +42,11 @@ async function Collection() {
 
   const collection = await listCollection(session.user.id);
   const counts = shelves.map((s) => collection[s.key].length);
-  const account = (
-    <p className="mt-3 text-sm text-muted">
-      Signed in as{" "}
-      <Link
-        href={session.user.username ? `/u/${session.user.username}` : "/settings"}
-        className="text-gold underline underline-offset-4"
-      >
-        {session.user.name}
-      </Link>
-      .{" "}
-      <Link href="/rankings" className="text-gold underline underline-offset-4">
-        My rankings
-      </Link>{" "}
-      <SignOutButton className="ml-2 text-gold underline underline-offset-4" />
-    </p>
-  );
 
   if (counts.every((n) => n === 0)) {
     return (
       <div className="mt-6 max-w-md">
-        {account}
-        <p className="mt-6 text-muted">
+        <p className="text-muted">
           Nothing here yet. Open any fragrance and choose Have it, Want it or Had it to put it on a shelf.
         </p>
         <Link href="/fragrances" className={`${primaryButton} mt-8`}>
@@ -79,7 +61,6 @@ async function Collection() {
       <p className="mt-3 text-muted">
         {counts[0]} owned, {counts[1]} wanted, {counts[2]} used to own
       </p>
-      {account}
       {shelves.map((shelf) => (
         <section key={shelf.key} className="mt-14" aria-labelledby={`${shelf.key}-heading`}>
           <h2 id={`${shelf.key}-heading`} className="mb-4 border-b border-line pb-2 text-base font-bold">

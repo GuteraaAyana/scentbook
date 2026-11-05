@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { FragranceRow } from "@/components/fragrance-card";
+import { FragranceSearch } from "@/components/fragrance-search";
 import { HomeFeed } from "@/components/home-feed";
 import { TodayPick } from "@/components/today-pick";
 import type { FragranceCardData } from "@/db/fragrances";
@@ -35,18 +36,20 @@ export default async function Home() {
         </div>
       </section>
 
-      <Suspense>
-        <TodayPick />
-      </Suspense>
+      <FragranceSearch syncUrl={false}>
+        <Suspense>
+          <TodayPick />
+        </Suspense>
 
-      <Suspense>
-        <HomeFeed />
-      </Suspense>
+        <Suspense>
+          <HomeFeed />
+        </Suspense>
 
-      {/* Community rows wait until enough has been ranked to fill a row. */}
-      {topRated.length >= MIN_ROW && <Row title="Highest rated" fragrances={topRated} />}
-      <Row title="Featured" fragrances={featured} />
-      {mostRanked.length >= MIN_ROW && <Row title="Most ranked" fragrances={mostRanked} />}
+        {/* Community rows wait until enough has been ranked to fill a row. */}
+        {topRated.length >= MIN_ROW && <Row title="Highest rated" fragrances={topRated} />}
+        <Row title="Featured" fragrances={featured} />
+        {mostRanked.length >= MIN_ROW && <Row title="Most ranked" fragrances={mostRanked} />}
+      </FragranceSearch>
     </main>
   );
 }

@@ -3,11 +3,11 @@ import { describe, test } from "node:test";
 import { USERNAME_CHANGE_DAYS, usernameChange, validateProfile, validateUsername } from "./profile";
 
 describe("validateProfile", () => {
-  const valid = { username: "santal_fan", bio: "Woods and smoke.", city: "Lisbon" };
+  const valid = { username: "santal_fan", bio: "Woods and smoke." };
 
   test("accepts a normal profile and trims it", () => {
-    const result = validateProfile({ username: "  Santal_Fan ", bio: " Woods and smoke. ", city: " Lisbon " });
-    assert.deepEqual(result, { ok: true, value: { username: "santal_fan", bio: "Woods and smoke.", city: "Lisbon" } });
+    const result = validateProfile({ username: "  Santal_Fan ", bio: " Woods and smoke. " });
+    assert.deepEqual(result, { ok: true, value: { username: "santal_fan", bio: "Woods and smoke." } });
   });
 
   test("lowercases usernames so @Santal and @santal can't both exist", () => {
@@ -15,9 +15,9 @@ describe("validateProfile", () => {
     assert.ok(result.ok && result.value.username === "santal");
   });
 
-  test("empty bio and city are stored as nothing", () => {
-    const result = validateProfile({ ...valid, bio: "   ", city: "" });
-    assert.ok(result.ok && result.value.bio === null && result.value.city === null);
+  test("an empty bio is stored as nothing", () => {
+    const result = validateProfile({ ...valid, bio: "   " });
+    assert.ok(result.ok && result.value.bio === null);
   });
 
   test("rejects usernames that are too short, too long or have other characters", () => {
@@ -27,13 +27,13 @@ describe("validateProfile", () => {
     }
   });
 
-  test("rejects a bio over 160 characters and a city over 60", () => {
-    const result = validateProfile({ ...valid, bio: "x".repeat(161), city: "y".repeat(61) });
-    assert.ok(!result.ok && result.errors.bio && result.errors.city);
+  test("rejects a bio over 160 characters", () => {
+    const result = validateProfile({ ...valid, bio: "x".repeat(161) });
+    assert.ok(!result.ok && result.errors.bio);
   });
 
   test("reports every problem at once", () => {
-    const result = validateProfile({ username: "x", bio: "x".repeat(200), city: "fine" });
+    const result = validateProfile({ username: "x", bio: "x".repeat(200) });
     assert.ok(!result.ok);
     assert.deepEqual(Object.keys(result.errors).sort(), ["bio", "username"]);
   });

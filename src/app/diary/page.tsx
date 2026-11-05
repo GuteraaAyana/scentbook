@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { WearEntry } from "@/components/wear-entry";
+import { isUnit } from "@/lib/temperature";
 import { listWears } from "@/db/wears";
 import { auth } from "@/lib/auth";
 import { pageContainer, primaryButton } from "@/lib/ui";
@@ -29,6 +30,7 @@ async function Diary() {
   if (!session) redirect("/sign-in?next=/diary");
 
   const entries = await listWears(session.user.id);
+  const unit = isUnit(session.user.temperatureUnit) ? session.user.temperatureUnit : "c";
 
   if (entries.length === 0) {
     return (
@@ -67,7 +69,7 @@ async function Diary() {
           <h2 className="border-b border-line pb-2 text-base font-bold">{month.label}</h2>
           <ol className="divide-y divide-line">
             {month.items.map((entry) => (
-              <WearEntry key={entry.wearId} entry={entry} editable />
+              <WearEntry key={entry.wearId} entry={entry} unit={unit} editable />
             ))}
           </ol>
         </section>

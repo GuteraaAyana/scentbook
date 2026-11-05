@@ -17,6 +17,10 @@ export async function getOwnProfile(userId: string) {
       username: users.username,
       bio: users.bio,
       city: users.city,
+      cityPlaceId: users.cityPlaceId,
+      cityLatitude: users.cityLatitude,
+      cityLongitude: users.cityLongitude,
+      temperatureUnit: users.temperatureUnit,
       usernameChangedAt: users.usernameChangedAt,
     })
     .from(users)
@@ -50,8 +54,8 @@ export async function getPublicProfile(username: string, viewerId?: string) {
     shelf: collection.have,
     mostWorn,
     reviews,
-    // Diary notes can be personal, so they never leave this function for a
+    // Diary notes and places can be personal, so they never leave this function for a
     // public page.
-    recentWears: recentWears.map((wear) => ({ ...wear, note: null })),
+    recentWears: recentWears.map((wear) => ({ ...wear, note: null, place: null })),
   };
 }

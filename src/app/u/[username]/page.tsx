@@ -8,6 +8,7 @@ import { FollowButton } from "@/components/follow-button";
 import { FragranceGrid, FragranceRow } from "@/components/fragrance-card";
 import { Poster } from "@/components/poster";
 import { WearEntry } from "@/components/wear-entry";
+import { isUnit } from "@/lib/temperature";
 import { RankedList } from "@/components/ranked-list";
 import { getPublicProfile } from "@/db/profiles";
 import { auth } from "@/lib/auth";
@@ -41,6 +42,7 @@ async function Profile({ params }: Pick<PageProps<"/u/[username]">, "params">) {
 
   const { user, counts, follow, topRanked, shelf, mostWorn, recentWears, reviews } = profile;
   const isOwner = session?.user.username === user.username;
+  const viewerUnit = isUnit(session?.user.temperatureUnit) ? session.user.temperatureUnit : "c";
   const firstName = user.name.split(" ")[0];
 
   return (
@@ -143,7 +145,7 @@ async function Profile({ params }: Pick<PageProps<"/u/[username]">, "params">) {
           </h2>
           <ol className="divide-y divide-line">
             {recentWears.map((entry) => (
-              <WearEntry key={entry.wearId} entry={entry} showMonth />
+              <WearEntry key={entry.wearId} entry={entry} unit={viewerUnit} showMonth />
             ))}
           </ol>
         </section>

@@ -217,3 +217,41 @@ export async function listCommunityHighlights(limit = 8) {
   const [topRated, mostRanked] = await Promise.all([pick(byScore), pick(byCount)]);
   return { topRated, mostRanked };
 }
+
+// Everything the search box needs, for the whole catalog at once: each card
+// plus the names of its notes and accords. The browser loads it once and
+// filters on every keystroke (src/lib/search.ts).
+export async function getSearchIndex() {
+  "use cache";
+  cacheLife("days");
+  cacheTag("fragrances", "rankings");
+
+  const rows = await db
+    .select(cardColumns)
+    .from(fragrances)
+    .innerJoin(brands, eq(brands.id, fragrances.brandId))
+    .orderBy(asc(brands.name), asc(fragrances.name), asc(fragrances.id));
+  const [cards, noteRows, accordRows] = await Promise.all([
+    toCards(rows),
+    db
+      .select({ fragranceId: fragranceNotes.fragranceId, name: notes.name })
+      .from(fragranceNotes)
+      .innerJoin(notes, eq(notes.id, fragranceNotes.noteId)),
+    db
+      .select({ fragranceId: fragranceAccords.fragranceId, name: accords.name })
+      .from(fragranceAccords)
+      .innerJoin(accords, eq(accords.id, fragranceAccords.accordId)),
+  ]);
+  const notesOf = new Map<number, string[]>();
+  for (const n of noteRows) notesOf.set(n.fragranceId, [...(notesOf.get(n.fragranceId) ?? []), n.name]);
+  const accordsOf = new Map<number, string[]>();
+  for (const a of accordRows) accordsOf.set(a.fragranceId, [...(accordsOf.get(a.fragranceId) ?? []), a.name]);
+
+  return cards.map(({ id, ...card }) => ({
+    ...card,
+    notes: [...new Set(notesOf.get(id) ?? [])],
+    accordNames: accordsOf.get(id) ?? [],
+  }));
+}
+
+export type SearchIndexEntry = Awaited<ReturnType<typeof getSearchIndex>>[number];
