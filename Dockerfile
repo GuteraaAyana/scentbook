@@ -26,7 +26,8 @@ FROM node:24-alpine AS run
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0 \
     NODE_EXTRA_CA_CERTS=/app/rds-ca.pem
-COPY --from=build /app/rds-ca.pem ./rds-ca.pem
+# Readable by the unprivileged user the app runs as.
+COPY --from=build --chmod=644 /app/rds-ca.pem ./rds-ca.pem
 COPY --from=build /app/public ./public
 COPY --from=build --chown=node:node /app/.next/standalone ./
 COPY --from=build --chown=node:node /app/.next/static ./.next/static
