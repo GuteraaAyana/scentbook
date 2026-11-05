@@ -11,6 +11,7 @@
 import { and, eq, inArray, isNull, sql, type AnyColumn } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import * as schema from "../schema";
+import { fragranceSlug, slugify } from "../../lib/slug";
 import type { SeedFragrance } from "./data";
 
 type Db = NodePgDatabase<typeof schema>;
@@ -19,7 +20,8 @@ type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
 export type CatalogFragrance = Omit<SeedFragrance, "releaseYear"> & {
   releaseYear: number | null; // imports don't always know it
   externalId?: string;
-  imageUrl?: string | null; // only imports have images (DECISIONS 009)
+  imageUrl?: string | null; // imports and moderators have images (DECISIONS 009)
+  addedBy?: string; // the moderator's user id, for fragrances added on the site
 };
 
 export type CatalogInput = {
@@ -30,20 +32,7 @@ export type CatalogInput = {
   fragrances: CatalogFragrance[];
 };
 
-// "Baccarat Rouge 540" → "baccarat-rouge-540", "Acqua di Giò" → "acqua-di-gio"
-export function slugify(text: string): string {
-  return text
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "") // strip accents
-    .toLowerCase()
-    .replace(/&/g, "-")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
-export function fragranceSlug(f: { brand: string; name: string }) {
-  return slugify(`${f.brand} ${f.name}`);
-}
+export { fragranceSlug, slugify } from "../../lib/slug";
 
 // In an upsert, `excluded.<column>` is the value we tried to insert.
 function excluded(column: AnyColumn) {
@@ -129,6 +118,7 @@ export async function upsertCatalog(db: Db, input: CatalogInput) {
       source: input.source,
       externalId: f.externalId ?? null,
       imageUrl: f.imageUrl ?? null,
+      addedBy: f.addedBy ?? null,
     }));
     if (fragranceValues.length > 0) {
       await tx
@@ -149,8 +139,9 @@ export async function upsertCatalog(db: Db, input: CatalogInput) {
             // import filled in (below) instead of clearing it.
             ...(curated ? {} : { imageUrl: excluded(schema.fragrances.imageUrl) }),
           },
-          // An import may refresh its own rows but never overwrite curated ones.
-          setWhere: curated ? undefined : eq(schema.fragrances.source, "fragella"),
+          // An import (or a moderator) may refresh its own rows but never
+          // overwrite anyone else's.
+          setWhere: curated ? undefined : eq(schema.fragrances.source, input.source),
         });
     }
 
@@ -171,7 +162,7 @@ export async function upsertCatalog(db: Db, input: CatalogInput) {
 
     // An import never changes curated fragrances, except to give one without
     // an image the bottle image of its imported match.
-    if (!curated) {
+    if (input.source === "fragella") {
       for (const f of fragranceValues) {
         if (!f.imageUrl || fragranceIds.has(f.slug)) continue;
         await tx

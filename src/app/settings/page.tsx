@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { ProfileForm } from "@/components/profile-form";
 import { getOwnProfile } from "@/db/profiles";
 import { auth } from "@/lib/auth";
+import { usernameLockedUntil } from "@/lib/profile";
 import { pageContainer } from "@/lib/ui";
 
 export const metadata: Metadata = { title: "Profile settings · Scentbook" };
@@ -29,6 +30,9 @@ async function Settings() {
   const profile = await getOwnProfile(session.user.id);
   if (!profile) redirect("/sign-in?next=/settings");
 
+  const locked = usernameLockedUntil({ username: profile.username, changedAt: profile.usernameChangedAt }, new Date());
+  const lockedUntil = locked?.toLocaleDateString("en", { month: "long", day: "numeric", year: "numeric" }) ?? null;
+
   return (
     <>
       <p className="mt-3 max-w-lg text-muted">
@@ -38,6 +42,7 @@ async function Settings() {
       </p>
       <ProfileForm
         initial={{ username: profile.username ?? "", bio: profile.bio ?? "", city: profile.city ?? "" }}
+        usernameLockedUntil={lockedUntil}
       />
     </>
   );

@@ -69,8 +69,8 @@ async function UserMenu() {
         Rankings
       </Link>
       {role === "admin" && (
-        <Link href="/admin/reports" className={`${navLink} hidden lg:inline`}>
-          Reports
+        <Link href="/admin" className={`${navLink} hidden lg:inline`}>
+          Admin
         </Link>
       )}
       <SignOutButton className={`${navLink} hidden lg:inline`} />

@@ -62,8 +62,9 @@ export const userRoleEnum = pgEnum("user_role", ["member", "admin"]);
 export const reportReasonEnum = pgEnum("report_reason", ["spam", "offensive", "off_topic", "other"]);
 
 // Where a catalog fragrance came from: hand-curated in src/db/seed/data.ts,
-// or imported from the Fragella API (see DECISIONS.md 007).
-export const catalogSourceEnum = pgEnum("catalog_source", ["curated", "fragella"]);
+// imported from the Fragella API (see DECISIONS.md 007), or added by a
+// moderator at /admin/fragrances/new (DECISIONS.md 019).
+export const catalogSourceEnum = pgEnum("catalog_source", ["curated", "fragella", "moderator"]);
 
 // ---------------------------------------------------------------------------
 // 1. Catalog
@@ -101,6 +102,8 @@ export const fragrances = pgTable(
     // be found (or removed) by filtering on source.
     source: catalogSourceEnum("source").notNull().default("curated"),
     externalId: text("external_id"), // Fragella's `_id`, for imported rows
+    // The moderator who added it, for rows added through the site.
+    addedBy: text("added_by").references(() => users.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -203,6 +206,8 @@ export const users = pgTable("users", {
   image: text("image"),
   // Scentbook's own profile fields, declared to Better Auth as additionalFields.
   username: text("username").unique(),
+  // When the username was last set; it can change once every 7 days.
+  usernameChangedAt: timestamp("username_changed_at", { withTimezone: true }),
   bio: text("bio"),
   city: text("city"), // used for the weather-based "wear today" pick
   role: userRoleEnum("role").notNull().default("member"),

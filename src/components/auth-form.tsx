@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { validateUsername } from "@/lib/profile";
 import { primaryButton, secondaryButton, textField } from "@/lib/ui";
 
 type Props = {
@@ -33,10 +34,20 @@ export function AuthForm({ mode, providers }: Props) {
     const email = String(form.get("email"));
     const password = String(form.get("password"));
 
+    let username = "";
+    if (signUp) {
+      const checked = validateUsername(String(form.get("username") ?? ""));
+      if (!checked.ok) {
+        setError(checked.error);
+        return;
+      }
+      username = checked.value;
+    }
+
     setPending(true);
     setError(null);
     const { error } = signUp
-      ? await authClient.signUp.email({ name: String(form.get("name")), email, password })
+      ? await authClient.signUp.email({ name: String(form.get("name")), email, password, username })
       : await authClient.signIn.email({ email, password });
     setPending(false);
 
@@ -88,6 +99,30 @@ export function AuthForm({ mode, providers }: Props) {
           <label className="block text-sm font-medium">
             Name
             <input name="name" required autoComplete="name" className={textField} />
+          </label>
+        )}
+        {signUp && (
+          <label className="block text-sm font-medium">
+            Username
+            <span className="relative mt-1.5 block">
+              <span aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted">
+                @
+              </span>
+              <input
+                name="username"
+                required
+                minLength={3}
+                maxLength={20}
+                autoComplete="username"
+                autoCapitalize="none"
+                spellCheck={false}
+                aria-describedby="signup-username-help"
+                className={`${textField.replace("mt-1.5 ", "")} pl-7`}
+              />
+            </span>
+            <span id="signup-username-help" className="mt-1.5 block text-sm font-normal text-muted">
+              Your profile&rsquo;s address: letters, numbers and underscores. You can change it once a week.
+            </span>
           </label>
         )}
         <label className="block text-sm font-medium">

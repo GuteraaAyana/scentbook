@@ -2,10 +2,13 @@
 // The browser talks to it through /api/auth/* (src/app/api/auth/[...all]).
 import "server-only";
 import { betterAuth } from "better-auth";
+import { APIError } from "better-auth/api";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { db } from "@/db";
+import { eq } from "drizzle-orm";
 import { accounts, rateLimits, sessions, users, verifications } from "@/db/schema";
+import { validateUsername } from "@/lib/profile";
 
 const github =
   process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET
@@ -33,8 +36,11 @@ export const auth = betterAuth({
   user: {
     modelName: "users",
     additionalFields: {
-      // Set later from the profile page, not at sign-up.
-      username: { type: "string", required: false, input: false },
+      // Chosen at sign-up with email and password (checked in databaseHooks
+      // below); GitHub/Google accounts pick one in settings. Changing it
+      // later goes through the profile settings action and its 7-day rule.
+      username: { type: "string", required: false, input: true },
+      usernameChangedAt: { type: "date", required: false, input: false },
       bio: { type: "string", required: false, input: false },
       city: { type: "string", required: false, input: false },
       // "member" or "admin". Only for showing the Reports link; the moderator
@@ -53,6 +59,34 @@ export const auth = betterAuth({
   socialProviders: {
     ...(github && { github }),
     ...(google && { google }),
+  },
+
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user, ctx) => {
+          const raw = (user as { username?: unknown }).username;
+          if (raw == null || raw === "") {
+            if (ctx?.path === "/sign-up/email") throw new APIError("BAD_REQUEST", { message: "Pick a username." });
+            return; // GitHub/Google: chosen later in settings
+          }
+          const checked = validateUsername(String(raw));
+          if (!checked.ok) throw new APIError("BAD_REQUEST", { message: checked.error });
+          const [taken] = await db.select({ id: users.id }).from(users).where(eq(users.username, checked.value));
+          if (taken) throw new APIError("BAD_REQUEST", { message: "That username is taken. Try another." });
+          return { data: { ...user, username: checked.value, usernameChangedAt: new Date() } };
+        },
+      },
+      update: {
+        // Better Auth's own /update-user endpoint may not change usernames:
+        // that would skip the 7-day rule. Settings saves it directly instead.
+        before: async (data, ctx) => {
+          if (ctx?.path === "/update-user" && "username" in data) {
+            throw new APIError("BAD_REQUEST", { message: "Change your username in settings." });
+          }
+        },
+      },
+    },
   },
 
   // In production the app sits behind a load balancer, which adds the

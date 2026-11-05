@@ -182,3 +182,16 @@ This replaces the look in 009 (the dark boutique). The Fragella bottle images an
 - **Also added:** `/api/health` (checks the database; deploys wait for it and roll back if it fails) and an error page that shows a reference people can quote.
 - **Free plan limits:** RDS backups are kept for 1 day (the Free plan's maximum; 7 once upgraded). The account must move to a paid plan before 21 April 2027, or it closes.
 - **Not yet:** error tracking beyond the logs (for example Sentry), CloudWatch alarms, and infrastructure as code (the setup is a handful of CLI commands, recorded in DEPLOY.md and `infra/`).
+
+## 019. Usernames at sign-up, and moderators adding fragrances
+**Date:** 2026-11-05
+
+- **Usernames:** signing up with email and password now asks for a `@username`, which is your profile's address. It can change once every 7 days (`users.username_changed_at`, migration 0005), so profile links stay put and nobody can hop between names. Settings says when the next change is allowed. GitHub and Google accounts still pick one in settings; the first pick is always allowed.
+  - Checked on the server as the account is created (a Better Auth hook): 3–20 letters, numbers or underscores, stored lowercase, not taken, and not one of a few names that would look official (admin, moderator, scentbook…).
+  - Better Auth's own "update user" endpoint refuses username changes, so the only way to change one is Settings, where the 7-day rule lives. Rules and tests: `src/lib/profile.ts`.
+- **Adding a fragrance:** moderators get `/admin` and `/admin/fragrances/new`. The form takes the house, name, concentration, gender, year, perfumers, notes by layer, accords with strengths, an optional photo link and a description. Pasting a "Top notes are …; middle notes are …; base notes are …" sentence fills in the three layers.
+  - **Matching:** every house, perfumer, note and accord is matched to the catalog as you type, ignoring case, accents, punctuation and plurals ("pink peppers" = Pink Pepper). Matches are saved with the catalog's spelling. Anything new is marked, and likely mistakes get a "did you mean": a few letters off ("Bergamont" → Bergamot) or a shortened name ("Armani" → Giorgio Armani). New accords get a colour picker. A summary lists exactly what saving will create. Rules and tests: `src/lib/catalog-entry.ts`.
+  - **Saving** reuses `upsertCatalog`, the same code as the seed and the Fragella import, with a new `moderator` source. Imports never overwrite moderator rows, and `fragrances.added_by` records who added each one. A fragrance whose slug already exists is refused, with a hint to put the version in the name. Browse and home refresh at once.
+  - **Photos:** a moderator can link a bottle photo from any `https://` site, so the Content-Security-Policy now allows images from any HTTPS source (scripts are still only from this site).
+- **Considered:** a free-text "paste anything" importer. Rejected: fragrance sites format pages differently and change them, so guessing would quietly produce wrong data. Structured fields plus visible matching keep a person in charge of every name.
+- **Not yet:** editing or deleting a fragrance from the site, and members suggesting fragrances for moderators to approve (the roadmap's submissions queue builds on this form).

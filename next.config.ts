@@ -6,12 +6,13 @@ const isDev = process.env.NODE_ENV !== "production";
 // allow 'unsafe-inline' because prerendered pages (cacheComponents) are built
 // before any request exists, so there's no per-request nonce to give them;
 // Next's docs recommend this form for statically generated pages.
-// Bottle photos come from Fragella's CDN. Weather is fetched server-side.
+// Bottle photos come from Fragella's CDN, or any https:// link a moderator
+// adds (DECISIONS 019). Weather is fetched server-side.
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://cdn.fragella.com",
+  "img-src 'self' data: blob: https:",
   "font-src 'self'",
   `connect-src 'self'${isDev ? " ws:" : ""}`,
   "object-src 'none'",

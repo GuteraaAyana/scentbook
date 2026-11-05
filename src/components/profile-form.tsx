@@ -9,7 +9,14 @@ import { primaryButton, textField } from "@/lib/ui";
 const fieldError = "mt-1.5 block text-sm text-danger";
 const fieldHint = "mt-1.5 block text-sm font-normal text-muted";
 
-export function ProfileForm({ initial }: { initial: ProfileFormState["values"] }) {
+export function ProfileForm({
+  initial,
+  usernameLockedUntil,
+}: {
+  initial: ProfileFormState["values"];
+  // Set when the username was changed in the last 7 days.
+  usernameLockedUntil: string | null;
+}) {
   const [state, save, pending] = useActionState(updateProfile, {
     values: initial,
     errors: {},
@@ -41,7 +48,10 @@ export function ProfileForm({ initial }: { initial: ProfileFormState["values"] }
           />
         </span>
         <span id="username-help" className={errors.username ? fieldError : fieldHint}>
-          {errors.username ?? "Your profile lives at /u/your-username. Letters, numbers and underscores."}
+          {errors.username ??
+            (usernameLockedUntil
+              ? `You can change it once a week; next on ${usernameLockedUntil}.`
+              : "Your profile lives at /u/your-username. Letters, numbers and underscores. You can change it once a week.")}
         </span>
       </label>
 

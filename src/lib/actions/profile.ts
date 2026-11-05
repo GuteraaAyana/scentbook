@@ -7,7 +7,7 @@ import { headers } from "next/headers";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { auth } from "@/lib/auth";
-import { type ProfileErrors, type ProfileInput, validateProfile } from "@/lib/profile";
+import { type ProfileErrors, type ProfileInput, usernameChange, validateProfile } from "@/lib/profile";
 
 export type ProfileFormState = {
   values: ProfileInput;
@@ -36,10 +36,26 @@ export async function updateProfile(_previous: ProfileFormState, form: FormData)
   const result = validateProfile(values);
   if (!result.ok) return { values, errors: result.errors, saved: false, message: null };
 
+  const [current] = await db
+    .select({ username: users.username, changedAt: users.usernameChangedAt })
+    .from(users)
+    .where(eq(users.id, session.user.id));
+  const now = new Date();
+  const change = usernameChange(current ?? { username: null, changedAt: null }, result.value.username, now);
+  if (!change.allowed) {
+    const when = change.availableAt.toLocaleDateString("en", { month: "long", day: "numeric" });
+    return {
+      values,
+      errors: { username: `You can change your username once a week. Next change: ${when}.` },
+      saved: false,
+      message: null,
+    };
+  }
+
   try {
     await db
       .update(users)
-      .set({ ...result.value, updatedAt: new Date() })
+      .set({ ...result.value, ...(change.changed && { usernameChangedAt: now }), updatedAt: now })
       .where(eq(users.id, session.user.id));
   } catch (error) {
     if (isUniqueViolation(error)) {

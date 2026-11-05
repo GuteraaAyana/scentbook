@@ -36,7 +36,13 @@ async function Reports() {
 
   return (
     <>
-      <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Reports</h1>
+      <p className="text-sm text-muted">
+        <Link href="/admin" className="hover:text-foreground">
+          Admin
+        </Link>{" "}
+        / Reports
+      </p>
+      <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">Reports</h1>
       <p className="mt-3 max-w-xl text-muted">
         Reviews members have reported. One reported by three people is hidden until you decide. Hiding closes its
         reports; keeping it up dismisses them and undoes an automatic hide.

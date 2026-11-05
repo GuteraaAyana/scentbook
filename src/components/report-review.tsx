@@ -21,7 +21,7 @@ export function ReportReview({ reviewId, authorUsername }: { reviewId: number; a
   } satisfies ReportFormState);
 
   if (!session) return null;
-  const viewerUsername = (session.user as { username?: string | null }).username;
+  const viewerUsername = session.user.username;
   if (authorUsername && viewerUsername === authorUsername) return null;
 
   if (state.done) {

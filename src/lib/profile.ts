@@ -2,6 +2,42 @@
 // kept pure so they can be tested (profile.test.ts).
 
 export const USERNAME_PATTERN = /^[a-z0-9_]{3,20}$/;
+export const USERNAME_CHANGE_DAYS = 7;
+const DAY = 24 * 60 * 60 * 1000;
+
+// Names that would look official, so nobody can pose as the site.
+const RESERVED = new Set(["admin", "administrator", "moderator", "mod", "scentbook", "support", "staff", "system"]);
+
+// Usernames are case-insensitive: stored lowercase, so @Santal and @santal
+// can't belong to two people.
+export function validateUsername(raw: string): { ok: true; value: string } | { ok: false; error: string } {
+  const username = raw.trim().toLowerCase().replace(/^@/, "");
+  if (!USERNAME_PATTERN.test(username)) return { ok: false, error: "Use 3 to 20 letters, numbers or underscores." };
+  if (RESERVED.has(username)) return { ok: false, error: "That username is reserved. Try another." };
+  return { ok: true, value: username };
+}
+
+// A username can change once every 7 days, so profile links and @mentions
+// stay put and nobody can hop between names. Setting it for the first time
+// (an account made with GitHub or Google has none) is always allowed.
+type UsernameState = { username: string | null; changedAt: Date | null };
+
+// When the username may next change, or null if it may change now.
+export function usernameLockedUntil(current: UsernameState, now: Date): Date | null {
+  if (!current.username || !current.changedAt) return null;
+  const availableAt = new Date(current.changedAt.getTime() + USERNAME_CHANGE_DAYS * DAY);
+  return now >= availableAt ? null : availableAt;
+}
+
+export function usernameChange(
+  current: UsernameState,
+  next: string,
+  now: Date,
+): { allowed: true; changed: boolean } | { allowed: false; availableAt: Date } {
+  if (current.username === next) return { allowed: true, changed: false };
+  const availableAt = usernameLockedUntil(current, now);
+  return availableAt ? { allowed: false, availableAt } : { allowed: true, changed: true };
+}
 export const BIO_MAX = 160;
 export const CITY_MAX = 60;
 
@@ -12,16 +48,13 @@ export type ProfileErrors = Partial<Record<keyof ProfileInput, string>>;
 export function validateProfile(
   input: ProfileInput,
 ): { ok: true; value: ProfileValues } | { ok: false; errors: ProfileErrors } {
-  // Usernames are case-insensitive: stored lowercase, so @Santal and @santal
-  // can't belong to two people.
-  const username = input.username.trim().toLowerCase();
+  const checked = validateUsername(input.username);
+  const username = checked.ok ? checked.value : "";
   const bio = input.bio.trim();
   const city = input.city.trim();
   const errors: ProfileErrors = {};
 
-  if (!USERNAME_PATTERN.test(username)) {
-    errors.username = "Use 3 to 20 letters, numbers or underscores.";
-  }
+  if (!checked.ok) errors.username = checked.error;
   if (bio.length > BIO_MAX) errors.bio = `Keep it to ${BIO_MAX} characters (it's ${bio.length}).`;
   if (city.length > CITY_MAX) errors.city = `Keep it to ${CITY_MAX} characters.`;
 

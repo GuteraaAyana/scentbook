@@ -36,6 +36,13 @@
       "when": 1793819863944,
       "tag": "0004_moderation",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793918264231,
+      "tag": "0005_usernames_and_moderator_catalog",
+      "breakpoints": true
     }
   ]
 }

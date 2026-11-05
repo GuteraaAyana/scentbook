@@ -24,14 +24,15 @@ What's done, what's next, and what's planned for later. The reasoning behind eac
 - [x] Lighthouse after the redesign: fixed browse image loading and a layout shift on fragrance pages (PERFORMANCE.md); kept bottle photos unresized (DECISIONS 009)
 - [x] Moderation: report reviews, auto-hide at 3 reports, /admin/reports, `npm run make-admin`; rate limits on posting, sign-up and sign-in (DECISIONS 017)
 - [x] Live at https://scentbook.online: AWS EC2 + RDS, HTTPS by Caddy, deploy and rollback scripts, pre-launch security fixes ([DEPLOY.md](DEPLOY.md), DECISIONS 018)
+- [x] Usernames chosen at sign-up, changeable once a week; moderators add fragrances at /admin/fragrances/new, matched to the existing catalog (DECISIONS 019)
 
 ## Now
-- [ ] Sign up on the live site and make yourself a moderator (`make-admin`, see DEPLOY.md)
 - [ ] GitHub and Google sign-in: OAuth apps with `https://scentbook.online/api/auth/callback/...`, keys in `.env.production`, then `scripts/push-settings.sh` and deploy
 
 ## Next
 
 ## Later
+- [ ] Edit or delete a fragrance from the admin pages
 - [ ] Learn from your diary which fragrances you wear in which weather; prefill the weather when logging a wear
 - [ ] Notifications (new followers) and paging through older feed items
 - [ ] Edit a diary entry (for now: delete and log it again)

@@ -12,7 +12,13 @@ import { users } from "./schema";
 // The signed-in user's own editable fields, for the settings form.
 export async function getOwnProfile(userId: string) {
   const [row] = await db
-    .select({ name: users.name, username: users.username, bio: users.bio, city: users.city })
+    .select({
+      name: users.name,
+      username: users.username,
+      bio: users.bio,
+      city: users.city,
+      usernameChangedAt: users.usernameChangedAt,
+    })
     .from(users)
     .where(eq(users.id, userId));
   return row ?? null;
