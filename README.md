@@ -8,7 +8,7 @@
 
 - **App:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS
 - **Database:** PostgreSQL + Drizzle ORM (pgvector for similarity search, coming soon)
-- **Hosting:** AWS Lightsail container service + Amazon RDS for PostgreSQL. See [DEPLOY.md](DEPLOY.md)
+- **Hosting:** AWS: one EC2 server (Docker + Caddy) and Amazon RDS for PostgreSQL, live at https://scentbook.online. See [DEPLOY.md](DEPLOY.md)
 
 ## Data model
 
