@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { AuthForm } from "@/components/auth-form";
-import { socialProviders } from "@/lib/auth";
+import { AuthFormWithProviders } from "@/components/auth-form-with-providers";
 
 export const metadata: Metadata = { title: "Create an account · Scentbook" };
 
@@ -11,9 +10,9 @@ export default function SignUpPage() {
       <div className="mx-auto w-full max-w-sm">
       <h1 className="text-3xl font-extrabold tracking-tight">Create an account</h1>
       <p className="mt-2 text-muted">Log your collection, keep a wear diary, and rank what you&rsquo;ve tried.</p>
-      {/* AuthForm reads ?next=, so it renders in the browser inside Suspense. */}
+      {/* Per request (which sign-in providers are on) and reads ?next=, so inside Suspense. */}
       <Suspense>
-        <AuthForm mode="sign-up" providers={socialProviders} />
+        <AuthFormWithProviders mode="sign-up" />
       </Suspense>
       </div>
     </main>

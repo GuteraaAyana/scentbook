@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { AuthForm } from "@/components/auth-form";
-import { socialProviders } from "@/lib/auth";
+import { AuthFormWithProviders } from "@/components/auth-form-with-providers";
 
 export const metadata: Metadata = { title: "Sign in · Scentbook" };
 
@@ -10,9 +9,9 @@ export default function SignInPage() {
     <main className="flex-1 px-4 py-16 sm:py-24">
       <div className="mx-auto w-full max-w-sm">
       <h1 className="text-3xl font-extrabold tracking-tight">Sign in</h1>
-      {/* AuthForm reads ?next=, so it renders in the browser inside Suspense. */}
+      {/* Per request (which sign-in providers are on) and reads ?next=, so inside Suspense. */}
       <Suspense>
-        <AuthForm mode="sign-in" providers={socialProviders} />
+        <AuthFormWithProviders mode="sign-in" />
       </Suspense>
       </div>
     </main>
