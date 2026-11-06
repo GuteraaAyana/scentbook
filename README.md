@@ -13,6 +13,14 @@
   </tr>
 </table>
 
+## Highlights
+
+- **Full-stack and deployed:** people rank, review and log wears of fragrances, with GitHub/Google sign-in, follows and an activity feed.
+- **Comparison-based ranking:** each fragrance is placed by binary search (at most 7 questions for 100 items), and its position becomes a 0–10 score.
+- **Data:** a 21-table PostgreSQL schema with versioned migrations, and a catalog imported from a third-party API with deduplication and name matching.
+- **Performance:** mobile Lighthouse on the browse page went from 83 to 93 by fixing image loading priority and halving page weight (2.0 MB to 1.1 MB).
+- **Infrastructure:** AWS (EC2, RDS, ECR) with Docker, automatic HTTPS and health-checked rollbacks; 93–99 Lighthouse performance and 100 accessibility.
+
 ## What it does
 
 - **Browse and search** 128 fragrances from 11 houses, with their note pyramids (top, heart, base) and accords. Search filters as you type, across names, houses, notes and accords.
@@ -47,6 +55,7 @@ flowchart LR
 ### Things worth a look
 
 - **Ranking by comparison, not by star rating** ([`src/lib/ranking.ts`](src/lib/ranking.ts)). A new fragrance is placed by binary search over your list, so 100 fragrances take at most 7 questions. Positions are fractional sort keys, so an insert rewrites one row, not the list. Scores come from position within loved, fine and disliked bands that never overlap.
+- **A catalog from a messy third-party API** ([`src/db/import/fragella.ts`](src/db/import/fragella.ts), [DECISIONS 007](DECISIONS.md)). The import strips houses, concentrations and genders out of product names, skips sizes, testers and body products, merges different spellings of the same fragrance, and prefers the hand-curated spelling when one exists. It runs through the same upsert as the seed and the moderator form, across a 21-table schema with 7 versioned migrations.
 - **Caching that stays correct** ([DECISIONS 014, 017](DECISIONS.md)). Catalog pages are prerendered and cached, and writes expire exactly the tags they affect. While testing moderation I found a case where a restored review served a stale page shell for one request. I traced it to the review list being baked into the prerendered shell, and moved it to a per-request stream backed by the same cache.
 - **Search with no server round trip** ([`src/lib/search.ts`](src/lib/search.ts)). The first keystroke loads a compact index of the catalog; every keystroke after that is filtered and ranked in the browser.
 - **Weather from the real place and day.** Cities are chosen from Open-Meteo's own place list and re-checked by ID on the server. A wear's weather comes from the forecast service for recent days and from the historical archive before that.
@@ -64,7 +73,7 @@ Lighthouse, mobile, median of three runs ([PERFORMANCE.md](PERFORMANCE.md)):
 | Fragrance page | 98 | 100 | 2.3 s | 0 |
 | Browse | 93 | 100 | 3.2 s | 0 |
 
-Browse started at 83, with a 4.7 s largest paint. Loading the first two rows of bottle photos eagerly and halving the page size brought it to 93. The rest is full-size bottle photos from the catalog's image host, kept as they are on purpose ([DECISIONS 009](DECISIONS.md)).
+Browse started at 83, with a 4.7 s largest paint: its first bottle photo was marked lazy, so the browser held it back. Loading the first two rows eagerly (the first at high priority) and halving the page from 48 to 24 posters (2.0 MB to 1.1 MB) brought it to 93. The rest is full-size bottle photos from the catalog's image host, kept as they are on purpose ([DECISIONS 009](DECISIONS.md)).
 
 ## Data model
 
