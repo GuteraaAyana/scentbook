@@ -26,9 +26,10 @@ What's done, what's next, and what's planned for later. The reasoning behind eac
 - [x] Live at https://scentbook.online: AWS EC2 + RDS, HTTPS by Caddy, deploy and rollback scripts, pre-launch security fixes ([DEPLOY.md](DEPLOY.md), DECISIONS 018)
 - [x] Usernames chosen at sign-up, changeable once a week; moderators add fragrances at /admin/fragrances/new, matched to the existing catalog (DECISIONS 019)
 - [x] Search as you type (fragrances, people); cities from the weather service; weather filled in on wears; °C/°F; profile setup after sign-up; a Scentbook icon (DECISIONS 020)
+- [x] GitHub sign-in on the live site (the sign-in pages now check for provider keys per request)
 
 ## Now
-- [ ] GitHub and Google sign-in: OAuth apps with `https://scentbook.online/api/auth/callback/...`, keys in `.env.production`, then `scripts/push-settings.sh` and deploy
+- [ ] Google sign-in: an OAuth client with `https://scentbook.online/api/auth/callback/google` (needs a Google Cloud consent screen), keys in `.env.production`, then `scripts/push-settings.sh` and deploy
 
 ## Next
 

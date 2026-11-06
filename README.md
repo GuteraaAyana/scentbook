@@ -15,7 +15,7 @@
 
 ## Highlights
 
-- **Full-stack and deployed:** people rank, review and log wears of fragrances, with GitHub/Google sign-in, follows and an activity feed.
+- **Full-stack and deployed:** people rank, review and log wears of fragrances, with GitHub sign-in, follows and an activity feed.
 - **Comparison-based ranking:** each fragrance is placed by binary search (at most 7 questions for 100 items), and its position becomes a 0–10 score.
 - **Data:** a 21-table PostgreSQL schema with versioned migrations, and a catalog imported from a third-party API with deduplication and name matching.
 - **Performance:** mobile Lighthouse on the browse page went from 83 to 93 by fixing image loading priority and halving page weight (2.0 MB to 1.1 MB).
@@ -36,7 +36,7 @@
 |---|---|
 | **App** | Next.js 16 (App Router, Cache Components), React 19, TypeScript, Tailwind CSS 4 |
 | **Data** | PostgreSQL with Drizzle ORM: 21 tables, 7 migrations |
-| **Auth** | Better Auth: email and password, GitHub and Google, with database-backed sign-in rate limits |
+| **Auth** | Better Auth: email and password and GitHub (Google is built in too, off until it has keys), with database-backed sign-in rate limits |
 | **Hosting** | AWS: an EC2 server running the app in Docker behind Caddy (automatic HTTPS), Amazon RDS for the database in a private network, ECR for images, Parameter Store for secrets |
 | **APIs** | Fragella (catalog import), Open-Meteo (place search, current and historical weather) |
 | **Tests** | 107 unit tests on the logic that matters: ranking, scores, search, validation, matching, units |
